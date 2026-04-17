@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real Deals</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+  :root {
+    --black: #000000;
+    --white: #ffffff;
+    --yellow: #F5C400;
+    --yellow-dark: #d4a900;
+    --pink: #F2A7C3;
+    --pink-dark: #d4849f;
+    --orange: #E84B23;
+    --grey-dark: #1a1a1a;
+    --grey-mid: #2a2a2a;
+    --grey-light: #666666;
+    --green: #00b87a;
+    --red: #e63946;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--black); font-family:'Inter',Arial,sans-serif; min-height:100vh; color:var(--white); }
+  .container { max-width:900px; margin:0 auto; padding:32px 20px; }
+
+  /* HEADER */
+  .br-logo { font-size:13px; font-weight:900; letter-spacing:1px; color:var(--white); margin-bottom:20px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .br-dot { width:6px; height:6px; border-radius:50%; }
+  .br-dot.y { background:var(--yellow); }
+  .br-dot.p { background:var(--pink); }
+  .badge { display:inline-block; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--black); background:var(--yellow); padding:5px 14px; border-radius:2px; margin-bottom:16px; font-weight:700; }
+  h1 { font-size:clamp(36px,6vw,72px); font-weight:900; color:var(--white); line-height:1.0; margin-bottom:8px; letter-spacing:-2px; }
+  h1 span { color:var(--yellow); }
+  .subtitle { color:var(--grey-light); font-size:14px; max-width:500px; margin:0 auto; line-height:1.7; }
+
+  /* SCORE BAR */
+  .score-bar { display:flex; align-items:center; justify-content:space-between; background:var(--grey-dark); border:1px solid #333; padding:12px 20px; margin-bottom:24px; }
+  .score-item { text-align:center; }
+  .score-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--grey-light); margin-bottom:3px; }
+  .score-val { font-size:24px; font-weight:900; }
+  .score-val.y { color:var(--yellow); }
+  .score-val.p { color:var(--pink); }
+  .progress-wrap { flex:1; margin:0 24px; }
+  .progress-track { height:3px; background:#333; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--yellow); transition:width 0.5s; }
+  .progress-text { font-size:10px; color:var(--grey-light); margin-top:5px; text-align:center; letter-spacing:1px; }
+
+  .screen { display:none; }
+  .screen.active { display:block; animation:fadeUp 0.35s ease both; }
+
+  /* START SCREEN */
+  .start-wrap { text-align:center; padding:20px 0; }
+  .scenario-pills { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:28px 0; }
+  .s-pill { background:var(--grey-dark); border:1px solid #333; padding:6px 14px; font-size:11px; color:var(--grey-light); letter-spacing:1px; }
+  .curriculum-bar { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:#333; border:1px solid #333; margin:28px 0; }
+  .curr-item { background:var(--grey-dark); padding:16px; text-align:left; }
+  .curr-week { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--yellow); margin-bottom:4px; }
+  .curr-title { font-size:13px; font-weight:700; color:var(--white); }
+  .curr-hint { font-size:11px; color:var(--grey-light); margin-top:3px; }
+  .start-btn { background:var(--yellow); color:var(--black); border:none; padding:16px 48px; font-size:13px; font-weight:900; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:background 0.2s; }
+  .start-btn:hover { background:var(--yellow-dark); }
+
+  /* SCENARIO */
+  .scenario-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .scenario-num { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--yellow); }
+  .scenario-tag { font-size:10px; background:var(--grey-dark); border:1px solid #444; padding:4px 10px; color:var(--grey-light); letter-spacing:1px; }
+
+  /* GRAPHIC */
+  .scenario-graphic { width:100%; height:220px; margin-bottom:20px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; border-radius:4px; }
+
+  /* BRIEF */
+  .brief-card { background:var(--grey-dark); border-left:4px solid var(--yellow); padding:0; margin-bottom:20px; overflow:hidden; }
+  .brief-from { background:#111; padding:10px 16px; font-size:11px; color:var(--grey-light); letter-spacing:1px; display:flex; align-items:center; gap:8px; }
+  .brief-dot { width:8px; height:8px; border-radius:50%; background:var(--yellow); flex-shrink:0; }
+  .brief-body { padding:18px 20px; }
+  .brief-subject { font-size:12px; font-weight:700; color:var(--yellow); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+  .brief-text { font-size:14px; color:var(--white); line-height:1.8; }
+  .brief-tag { display:inline-block; font-size:9px; letter-spacing:2px; text-transform:uppercase; background:rgba(245,196,0,0.15); color:var(--yellow); padding:3px 8px; margin-top:10px; }
+
+  /* WEEK LINKS */
+  .week-refs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .week-ref { font-size:10px; background:transparent; border:1px solid #444; padding:5px 12px; color:var(--grey-light); letter-spacing:1px; display:flex; align-items:center; gap:6px; }
+  .week-ref-dot { width:5px; height:5px; border-radius:50%; background:var(--pink); }
+
+  /* QUESTION */
+  .question-box { margin-bottom:16px; }
+  .question-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--pink); margin-bottom:10px; }
+  .question-text { font-size:16px; font-weight:700; color:var(--white); line-height:1.5; margin-bottom:16px; }
+
+  .options-list { display:flex; flex-direction:column; gap:1px; background:#333; }
+  .opt { background:var(--grey-dark); border:none; padding:16px 20px; cursor:pointer; text-align:left; transition:background 0.15s; width:100%; display:flex; align-items:flex-start; gap:14px; }
+  .opt:hover:not(:disabled) { background:var(--grey-mid); }
+  .opt-letter { font-size:11px; font-weight:900; color:var(--yellow); min-width:20px; margin-top:2px; flex-shrink:0; }
+  .opt-text { font-size:13px; color:var(--white); line-height:1.5; }
+  .opt.best { background:#1a2a00; border-left:3px solid var(--yellow); }
+  .opt.best .opt-letter { color:var(--yellow); }
+  .opt.good { background:#003a1f; border-left:3px solid var(--green); }
+  .opt.good .opt-letter { color:var(--green); }
+  .opt.risky { background:#2a1a00; border-left:3px solid var(--orange); }
+  .opt.risky .opt-letter { color:var(--orange); }
+  .opt.wrong { background:#2a0a0a; border-left:3px solid var(--red); opacity:0.6; }
+  .opt.wrong .opt-letter { color:var(--red); }
+  .opt.selected { opacity:1 !important; }
+  .opt:disabled { cursor:not-allowed; }
+
+  /* OUTCOME */
+  .outcome-box { margin-bottom:20px; display:none; }
+  .outcome-box.show { display:block; animation:fadeUp 0.3s ease both; }
+  .outcome-header { padding:14px 18px; display:flex; align-items:center; gap:12px; }
+  .outcome-icon { font-size:20px; }
+  .outcome-title { font-size:15px; font-weight:900; }
+  .outcome-body { padding:0 18px 16px; font-size:13px; color:rgba(255,255,255,0.75); line-height:1.7; }
+  .outcome-week { padding:10px 18px; border-top:1px solid #333; font-size:11px; color:var(--grey-light); line-height:1.6; }
+  .outcome-week strong { color:var(--pink); font-weight:700; }
+
+  .outcome-best { background:var(--grey-dark); border-left:4px solid var(--yellow); }
+  .outcome-best .outcome-title { color:var(--yellow); }
+  .outcome-good { background:var(--grey-dark); border-left:4px solid var(--green); }
+  .outcome-good .outcome-title { color:var(--green); }
+  .outcome-risky { background:var(--grey-dark); border-left:4px solid var(--orange); }
+  .outcome-risky .outcome-title { color:var(--orange); }
+  .outcome-wrong { background:var(--grey-dark); border-left:4px solid var(--red); }
+  .outcome-wrong .outcome-title { color:var(--red); }
+
+  /* POINTS BADGE */
+  .points-badge { display:inline-block; font-size:11px; font-weight:900; padding:3px 10px; margin-left:10px; vertical-align:middle; }
+  .points-badge.best { background:var(--yellow); color:var(--black); }
+  .points-badge.good { background:var(--green); color:var(--black); }
+  .points-badge.risky { background:var(--orange); color:var(--black); }
+  .points-badge.wrong { background:var(--red); color:var(--white); }
+
+  .next-btn { display:none; margin:0 auto; background:var(--yellow); color:var(--black); border:none; padding:14px 40px; font-size:12px; font-weight:900; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
+  .next-btn.show { display:block; }
+  .next-btn:hover { background:var(--yellow-dark); }
+
+  /* FINAL */
+  .final-wrap { text-align:center; padding:48px 20px; }
+  .final-line { width:64px; height:4px; background:var(--yellow); margin:0 auto 24px; }
+  .final-title { font-size:clamp(36px,6vw,64px); font-weight:900; color:var(--white); letter-spacing:-2px; margin-bottom:8px; }
+  .final-title span { color:var(--yellow); }
+  .final-score-big { font-size:80px; font-weight:900; color:var(--yellow); line-height:1; letter-spacing:-3px; margin:16px 0 4px; }
+  .final-score-max { font-size:14px; color:var(--grey-light); letter-spacing:2px; text-transform:uppercase; margin-bottom:24px; }
+  .final-msg { color:var(--grey-light); font-size:14px; max-width:500px; margin:0 auto 32px; line-height:1.7; }
+  .final-breakdown { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:#333; border:1px solid #333; margin-bottom:32px; text-align:left; }
+  .breakdown-item { background:var(--grey-dark); padding:14px 16px; }
+  .breakdown-num { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--grey-light); margin-bottom:4px; }
+  .breakdown-title { font-size:12px; font-weight:700; color:var(--white); margin-bottom:4px; line-height:1.3; }
+  .breakdown-score { font-size:18px; font-weight:900; }
+  .breakdown-score.best { color:var(--yellow); }
+  .breakdown-score.good { color:var(--green); }
+  .breakdown-score.risky { color:var(--orange); }
+  .breakdown-score.wrong { color:var(--red); }
+  .restart-btn { background:transparent; border:2px solid var(--white); color:var(--white); padding:14px 36px; font-size:12px; font-weight:900; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .restart-btn:hover { background:var(--white); color:var(--black); }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="score-bar" id="scoreBar" style="display:none">
+    <div class="score-item"><div class="score-label">Points</div><div class="score-val y" id="scoreDisplay">0</div></div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text" id="progressText">Deal 1 of 10</div>
+    </div>
+    <div class="score-item"><div class="score-label">Streak</div><div class="score-val p" id="streakDisplay">0</div></div>
+  </div>
+
+  <!-- START -->
+  <div class="screen active" id="startScreen">
+    <div class="start-wrap">
+      <div style="text-align:center;margin-bottom:32px">
+        <div class="br-logo"><div class="br-dot y"></div>BlackRock<div class="br-dot p"></div></div>
+        <div class="badge">GSS — Week 4</div>
+        <h1>Real<br><span>Deals.</span></h1>
+        <p class="subtitle">10 real-world procurement scenarios. Multiple right answers. Real consequences. This is where everything comes together.</p>
+      </div>
+      <div class="curriculum-bar">
+        <div class="curr-item"><div class="curr-week">Week 1</div><div class="curr-title">Contract Templates</div><div class="curr-hint">HSA, CSA, GSA, VoV</div></div>
+        <div class="curr-item"><div class="curr-week">Week 2</div><div class="curr-title">Coupa Process</div><div class="curr-hint">Fields, workflow, governance</div></div>
+        <div class="curr-item"><div class="curr-week">Week 3</div><div class="curr-title">Master Agreements</div><div class="curr-hint">Exhibits, clauses, risk</div></div>
+      </div>
+      <div class="scenario-pills">
+        <div class="s-pill">Acquisition price hike</div>
+        <div class="s-pill">Conflicted negotiation</div>
+        <div class="s-pill">Renewal strategy</div>
+        <div class="s-pill">Wrong template</div>
+        <div class="s-pill">Blocked Coupa request</div>
+        <div class="s-pill">Ghosting vendor</div>
+        <div class="s-pill">Maverick spend</div>
+        <div class="s-pill">Scope creep</div>
+        <div class="s-pill">Undisclosed conflict</div>
+        <div class="s-pill">Budget surprise</div>
+      </div>
+      <button class="start-btn" onclick="startGame()">Enter the Deal Room</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="gameScreen">
+    <div class="scenario-header">
+      <div class="scenario-num" id="scenarioNum">Deal 01 of 10</div>
+      <div class="scenario-tag" id="scenarioTag"></div>
+    </div>
+
+    <div class="scenario-graphic" id="scenarioGraphic"></div>
+
+    <div class="brief-card">
+      <div class="brief-from"><div class="brief-dot" id="briefDot"></div><span id="briefFrom"></span></div>
+      <div class="brief-body">
+        <div class="brief-subject" id="briefSubject"></div>
+        <div class="brief-text" id="briefText"></div>
+        <div class="brief-tag" id="briefTag"></div>
+      </div>
+    </div>
+
+    <div class="week-refs" id="weekRefs"></div>
+
+    <div class="question-box">
+      <div class="question-label">What do you do?</div>
+      <div class="question-text" id="questionText"></div>
+      <div class="options-list" id="optionsList"></div>
+    </div>
+
+    <div class="outcome-box" id="outcomeBox">
+      <div class="outcome-header">
+        <div class="outcome-icon" id="outcomeIcon"></div>
+        <div class="outcome-title" id="outcomeTitle"></div>
+      </div>
+      <div class="outcome-body" id="outcomeBody"></div>
+      <div class="outcome-week" id="outcomeWeek"></div>
+    </div>
+
+    <div style="text-align:center;margin-top:8px">
+      <button class="next-btn" id="nextBtn" onclick="nextScenario()">Next Deal</button>
+    </div>
+  </div>
+
+  <!-- FINAL -->
+  <div class="screen" id="finalScreen">
+    <div class="final-wrap">
+      <div class="br-logo" style="justify-content:center"><div class="br-dot y"></div>BlackRock<div class="br-dot p"></div></div>
+      <div class="final-line"></div>
+      <div class="final-title">Deal Room <span>Complete.</span></div>
+      <div class="final-score-big" id="finalScore">0</div>
+      <div class="final-score-max" id="finalMax">out of 30 points</div>
+      <div class="final-msg" id="finalMsg"></div>
+      <div class="final-breakdown" id="finalBreakdown"></div>
+      <button class="restart-btn" onclick="restartGame()">Run It Again</button>
+    </div>
+  </div>
+
+</div>
+<script>
+
+var SCENARIOS = [
+  {
+    tag: "Acquisition / Negotiation",
+    from: "Sarah K., Category Lead → You",
+    subject: "Urgent — Vendor price increase post-acquisition",
+    text: "We just heard from TechCo. Since the BlackRock acquisition closed, they've increased their annual licence fee by 80%. They're citing our new scale and brand. The tool is used by a few teams but is not on the critical services list. Finance has confirmed there is zero budget for this increase. Teams are pushing back on me saying they need it.",
+    tag2: "Non-critical service · 80% price increase · No budget approved",
+    weekRefs: ["Week 1: Contract Templates", "Week 3: Master Agreement — termination clauses"],
+    question: "The vendor has a near-monopoly on this tool. There is no budget for the increase. What is your move?",
+    graphic: "acquisition",
+    options: [
+      { letter:"A", text:"Inform the teams that services may be disabled if no budget is found. Get written confirmation that they accept this risk. Play hardball with the vendor — do not blink.", type:"best", points:3, outcome:"This is the right call. The vendor is exploiting the acquisition. Without budget authority and with written sign-off from the business, you have the strongest possible negotiating position. Hardball works here — and if services go down, you have paper covering you.", week:"Week 3 link: Your termination clause and service continuity provisions are your leverage. Make sure the vendor knows you've read them." },
+      { letter:"B", text:"Ask finance for an exception to approve partial budget — maybe meet the vendor halfway at 40%.", type:"risky", points:1, outcome:"Partially acceptable but sets a dangerous precedent. You've validated that the price increase has some merit and weakened your negotiating floor. Once you move, vendors know you'll move again.", week:"Week 1 link: The contract type matters here — check whether your current agreement has price escalation clauses that cap increases." },
+      { letter:"C", text:"Escalate immediately to senior leadership and let them decide.", type:"good", points:2, outcome:"Not wrong — leadership should be aware. But escalating without a recommendation or a negotiating position leaves you looking unprepared. Come with a strategy, not just a problem.", week:"Always bring a recommendation when you escalate. 'Here's the situation, here are our options, here's what I recommend' is far stronger than 'what should I do?'" },
+      { letter:"D", text:"Tell the vendor you'll accept the increase and work out payment terms.", type:"wrong", points:0, outcome:"This is the worst outcome. You've accepted an 80% increase with no budget, no sign-off, and no negotiating leverage used. You've also set a precedent that BlackRock will absorb price hikes post-acquisition.", week:"Never accept a price increase without exhausting your leverage first — especially when there is no approved budget for it." }
+    ]
+  },
+  {
+    tag: "Negotiation / Stakeholder",
+    from: "Marcus T., Sales Director → You",
+    subject: "Can we reach out to DataVault about our analytics solution?",
+    text: "Hey — our sales team has a great opportunity to pitch our analytics platform to DataVault. I know your team is in the middle of renewing our contract with them but this feels like a huge revenue opportunity. Can we reach out to their procurement team this week?",
+    tag2: "Active negotiation · Conflicting interests · Vendor evasion",
+    weekRefs: ["Week 2: Stakeholder management", "Week 3: Negotiation leverage"],
+    question: "Your team is in a critical negotiation with DataVault who has been evading calls. The sales team wants to reach out. What do you do?",
+    graphic: "conflict",
+    options: [
+      { letter:"A", text:"Tell the sales team the timing is terrible and send them on a legitimate but time-consuming internal process — find alternative escalation routes that keep them busy without touching the vendor.", type:"best", points:3, outcome:"Smart move. You protect the negotiation without creating internal conflict. The sales team feels heard and redirected, not blocked. Meanwhile your negotiation stays clean.", week:"Procurement and sales motions with the same vendor are a major conflict of interest. Protecting the negotiation is always the priority — document your decision." },
+      { letter:"B", text:"Allow the sales team to reach out but ask them not to mention the procurement negotiation.", type:"wrong", points:0, outcome:"This is extremely risky. Any contact with the vendor during a live negotiation — even on a different topic — can undermine your position. The vendor now has additional leverage and information.", week:"Week 3 link: Negotiation leverage evaporates the moment the other side knows you need something from them. Separate conversations rarely stay separate." },
+      { letter:"C", text:"Pause the sales conversation entirely and loop in legal and compliance to assess the conflict.", type:"good", points:2, outcome:"Solid and defensible. Looping in compliance is the right instinct. It may slow things down but it protects both teams and creates a clear record of how the conflict was managed.", week:"Undisclosed conflicts of interest between buy-side and sell-side motions are a compliance risk. Documenting the decision to pause is always the right move." },
+      { letter:"D", text:"Let the sales team proceed — revenue opportunity outweighs procurement risk.", type:"wrong", points:0, outcome:"Completely wrong. You've prioritised a speculative revenue opportunity over an active cost negotiation, and created a serious conflict of interest. If the vendor finds out, your negotiating position collapses entirely.", week:"Revenue opportunities do not override procurement governance. Both need to be managed — just not simultaneously with the same vendor." }
+    ]
+  },
+  {
+    tag: "Renewal / Strategy",
+    from: "Vendor Account Manager → You",
+    subject: "Time to renew — let's set up a call",
+    text: "Hi! Your contract with us expires in 90 days. I'd love to get on a call and send over a renewal proposal. Usage has been great this year and we'd love to continue the partnership. I'll have our team prepare a proposal at current rates plus our standard 5% annual uplift.",
+    tag2: "90-day notice · Auto-renewal risk · Benchmarking opportunity",
+    weekRefs: ["Week 1: Contract type — HSA renewal", "Week 3: Pricing schedules and SLA review"],
+    question: "The vendor wants to renew at current rates plus 5%. What is your strategy?",
+    graphic: "renewal",
+    options: [
+      { letter:"A", text:"Benchmark the market before responding. Come back with competitive data and push for flat renewal or a reduction, using alternatives as leverage.", type:"best", points:3, outcome:"Excellent. You never negotiate from a position of ignorance. Market benchmarking gives you objective data, alternatives give you leverage, and 90 days is enough time to run a proper process if needed.", week:"Week 3 link: Check your pricing schedule — is there a cap on annual price increases? If so, the 5% uplift may already be in breach of your agreement." },
+      { letter:"B", text:"Accept the 5% uplift — it's standard and the relationship is good.", type:"wrong", points:0, outcome:"5% sounds small but compounds significantly over multi-year agreements. Accepting without pushback signals to the vendor that you don't benchmark, which weakens every future negotiation.", week:"Week 1 link: Always check whether your contract type (HSA, CSA, GSA) has auto-renewal clauses. Missing the notice window can lock you in at increased rates." },
+      { letter:"C", text:"Ask the vendor to hold while you check internal usage data and assess whether the tool is still needed.", type:"good", points:2, outcome:"Smart first move. Usage data tells you whether this renewal is worth fighting for at all. If usage has dropped, you have grounds to reduce scope or terminate — which is a powerful negotiating position.", week:"Week 2 link: Make sure the renewal is properly logged in Coupa as a Renewal request type — not a New request — to maintain spend history continuity." },
+      { letter:"D", text:"Tell the vendor you want a 3-year deal at current rates to lock in pricing.", type:"risky", points:1, outcome:"Locking in a multi-year deal without benchmarking first is risky. You may be locking in rates that are above market. Multi-year deals need senior approval and careful commercial structuring.", week:"Week 3 link: Multi-year pricing needs to live in the Schedule with clear escalation caps and break clauses. Never agree verbally to a multi-year without legal review." }
+    ]
+  },
+  {
+    tag: "Contract / Compliance",
+    from: "Business Team → You",
+    subject: "We signed an SOW — can you process the PO?",
+    text: "Hi, we've already agreed the scope and signed an SOW with our management consultant. The work starts next week. Can you raise the PO in Coupa? The value is $180,000 for a 6-month engagement. We used their standard contract — they said it was fine.",
+    tag2: "Maverick signing · Wrong template risk · Urgent start date",
+    weekRefs: ["Week 1: Consulting = CSA not supplier terms", "Week 2: Coupa request type — Remediation"],
+    question: "The business has signed a supplier contract without going through GSS. What do you do?",
+    graphic: "maverick",
+    options: [
+      { letter:"A", text:"Raise the PO but flag to the business that they must go through GSS next time.", type:"wrong", points:0, outcome:"You've legitimised maverick spend and taken on the compliance risk. Processing a PO against an unapproved contract exposes BlackRock to legal and financial risk — and you've told the business it's fine to do it again.", week:"Week 1 link: Consulting engagements must use our CSA — not the supplier's own terms. Supplier terms rarely include the IP, liability and audit protections we need." },
+      { letter:"B", text:"Refuse to raise the PO until legal reviews the signed contract and confirms whether it can be used or needs to be replaced with our CSA.", type:"best", points:3, outcome:"Correct. The work cannot start until the contract is compliant. Legal needs to review what was signed and determine whether it can be adopted via a VoV or needs to be replaced with our CSA entirely.", week:"Week 1 link: A consulting engagement on supplier terms is a red flag. Our CSA exists to protect BlackRock's IP and audit rights — supplier terms almost never do this adequately." },
+      { letter:"C", text:"Raise the PO as a Remediation request in Coupa and loop in legal and compliance to review the signed contract in parallel.", type:"good", points:2, outcome:"Good pragmatic response. Remediation flags the compliance gap properly and gets the right people involved. Work may still need to pause pending legal review but you have handled this correctly procedurally.", week:"Week 2 link: Remediation is the correct Coupa request type when a supplier is already engaged without proper process. It triggers the right compliance review workflow." },
+      { letter:"D", text:"Ask the business to get the supplier to countersign a BlackRock CSA retrospectively.", type:"risky", points:1, outcome:"This is worth trying but risky. Retrospective contracts are legally complex and the supplier may refuse. It also does not address the fact that work has already started under their terms.", week:"Week 3 link: Retrospective agreements need careful legal drafting to be enforceable. Always involve legal before attempting to replace a signed contract." }
+    ]
+  },
+  {
+    tag: "Coupa / Process",
+    from: "System Notification → You",
+    subject: "Your Coupa request has been returned — action required",
+    text: "Your supplier request for CloudAnalytics Ltd has been returned by the approver. Comments: 'Unable to approve — please review the mandatory fields.' The request is for a new SaaS analytics platform. Contract value: $95,000. Start date: 1 March. End date: 28 February next year.",
+    tag2: "Blocked workflow · Mandatory field error · Approver returned",
+    weekRefs: ["Week 2: Mandatory Coupa fields", "Week 2: Justification and request type"],
+    question: "Your request has been returned. Looking at the fields below, which is most likely causing the block?\n\nJustification: 'Analytics tool for the data team'\nRequest Type: New\nStart Date: 01 Mar 2025\nEnd Date: 28 Feb 2025\nAmount: $95,000\nLegal Framework: Hosted Services Agreement",
+    graphic: "coupa",
+    options: [
+      { letter:"A", text:"The justification is too vague — it does not explain the business need, which tool, or what problem it solves.", type:"good", points:2, outcome:"This is definitely an issue. 'Analytics tool for the data team' tells an approver nothing. It should name the tool, explain the business need, and quantify the value. However it may not be the only problem here.", week:"Week 2 link: A good justification answers: what is it, why do we need it, who will use it, and what happens if we do not have it. Always write for an auditor with zero context." },
+      { letter:"B", text:"The end date is wrong — 28 Feb 2025 is the same year as the start date, making it a less than one day contract.", type:"best", points:3, outcome:"Spot on. The end date should be 28 Feb 2026 — a clear typo that makes the contract duration less than one day. This will absolutely block the workflow and any PO raised against it would be invalid from day one.", week:"Week 2 link: Date errors are one of the most common and most damaging Coupa mistakes. The system cannot raise a valid PO if the end date precedes or equals the start date. Always double-check the year." },
+      { letter:"C", text:"The legal framework is wrong — a data analytics SaaS tool should use a General Services Agreement.", type:"wrong", points:0, outcome:"Incorrect. A cloud-hosted SaaS analytics platform is exactly what the Hosted Services Agreement is designed for. The vendor hosts the data and the platform — HSA is the right call here.", week:"Week 1 link: If the vendor hosts it and you access it remotely, it is always an HSA. This was covered in Week 1 — cloud platforms are never a GSA." },
+      { letter:"D", text:"The amount is wrong — $95,000 seems too round and should be verified against the contract.", type:"risky", points:1, outcome:"Worth checking but unlikely to be the blocker on its own. The date error is far more clearly wrong. Always fix the most obvious error first, then sense-check everything else.", week:"Week 2 link: The dollar amount must match the contract exactly. Round numbers can be legitimate but always verify against the signed agreement before submitting." }
+    ]
+  },
+  {
+    tag: "Vendor Management",
+    from: "You → Category Lead",
+    subject: "ContractPro not responding — contract expires in 14 days",
+    text: "We have been trying to reach ContractPro for three weeks. The contract expires in 14 days. The service is critical for our legal team. We have called, emailed, and left messages with their account manager. No response. The auto-renewal window has passed. We are at risk of a service gap.",
+    tag2: "Critical service · 14-day expiry · Vendor unresponsive",
+    weekRefs: ["Week 3: Termination and continuity clauses", "Week 2: Coupa renewal process"],
+    question: "Critical vendor is ghosting you with 14 days to contract expiry. What do you do?",
+    graphic: "ghost",
+    options: [
+      { letter:"A", text:"Escalate to the vendor's senior leadership directly. Send a formal written notice of the situation and the risk of service disruption. Copy legal.", type:"best", points:3, outcome:"Correct escalation path. Bypassing the account manager to senior leadership with a formal written notice creates urgency, a paper trail, and signals you are serious. Copying legal shows you understand the contractual implications.", week:"Week 3 link: Check your master agreement for notice periods and escalation procedures. A formal notice letter may also reset certain contractual obligations or trigger SLA penalties." },
+      { letter:"B", text:"Do nothing and hope the service continues automatically after expiry.", type:"wrong", points:0, outcome:"Extremely risky. Services that run beyond contract expiry without a signed agreement create significant legal and compliance exposure. If there is a dispute or an incident, BlackRock has no contractual protection.", week:"Week 3 link: Operating outside a signed contract — even by one day — removes all the protections your master agreement provides. Continuity of service does not equal continuity of contract." },
+      { letter:"C", text:"Start an emergency sourcing process to find an alternative vendor as a contingency while continuing to chase the incumbent.", type:"good", points:2, outcome:"Smart risk mitigation. Running a parallel track — continuing to chase the vendor while building a contingency — protects the business. It also signals to the vendor that you are not dependent on them.", week:"Week 2 link: Log the contingency sourcing as an RFX in Coupa immediately so there is a clear audit trail of your emergency response process." },
+      { letter:"D", text:"Ask the legal team to use the service without a contract in place and backfill the paperwork later.", type:"wrong", points:0, outcome:"This creates unacceptable compliance and legal risk. Backfilling contracts after the fact is a remediation situation and should never be the first resort for a critical service.", week:"Week 2 link: Remediation in Coupa exists for situations where a supplier is already engaged without a contract — but it should be a last resort, not a planned approach." }
+    ]
+  },
+  {
+    tag: "Maverick Spend",
+    from: "Finance → You",
+    subject: "Unrecognised supplier invoice — $45,000",
+    text: "We have received an invoice from BuildRight Consulting for $45,000. There is no PO in Coupa. No contract on file. No supplier record. The business unit says they have been using them for 4 months for project management support. They assumed it was fine because the amounts were small each month.",
+    tag2: "No PO · No contract · 4 months of maverick spend",
+    weekRefs: ["Week 1: CSA for consulting services", "Week 2: Remediation request type"],
+    question: "A supplier has been paid informally for 4 months with no contract. Finance cannot process the invoice. What do you do?",
+    graphic: "invoice",
+    options: [
+      { letter:"A", text:"Refuse to process the invoice and tell the business to stop using the supplier immediately until a contract is in place.", type:"risky", points:1, outcome:"Partially right but blunt. Stopping the relationship abruptly may cause more disruption than benefit if the supplier is mid-project. A managed wind-down or rapid formalisation is usually better than an immediate stop.", week:"Week 1 link: Consulting services must be contracted under a CSA. Four months of consulting without a CSA means BlackRock has no IP protection, no audit rights, and no liability cap on the work done to date." },
+      { letter:"B", text:"Open a Remediation request in Coupa, loop in legal to formalise the engagement with a CSA retrospectively, and agree a payment plan with finance for the outstanding invoice.", type:"best", points:3, outcome:"This is the full correct response. Remediation flags the compliance gap, legal protects BlackRock going forward, and managing the invoice through proper channels ensures it gets processed correctly. Document everything.", week:"Week 2 link: Remediation is specifically designed for this situation. It triggers a compliance review and creates a proper audit trail. Always accompany it with a root cause analysis — why did this happen and how do we prevent it?" },
+      { letter:"C", text:"Ask the business to raise a PO backdated to when the engagement started.", type:"wrong", points:0, outcome:"Backdating POs is fraudulent. Never do this. It falsifies financial records and creates serious legal and audit risk for BlackRock and for you personally.", week:"There is no acceptable version of backdating a PO. The correct path is always Remediation — not falsification of records." },
+      { letter:"D", text:"Process the invoice as a one-time exception and put a contract in place going forward.", type:"risky", points:1, outcome:"Processes the immediate pain but does not address the underlying compliance gap. Without a proper retrospective review, BlackRock has no protection for the work already done and no record of why this happened.", week:"Week 3 link: Four months of consulting without a CSA means all the IP created in that time may not be owned by BlackRock. Legal must assess this urgently — it is not just a process issue." }
+    ]
+  },
+  {
+    tag: "Contract Management",
+    from: "Business Team → You",
+    subject: "Supplier is delivering extra work and now invoicing for it",
+    text: "Our design agency has been brilliant — they went above and beyond the SOW and delivered some extra brand assets we asked for informally. Now they are invoicing us $28,000 for the additional work. The team loves them and wants to pay. The work was never in the SOW and was never formally approved.",
+    tag2: "Out of scope · No approval · $28k additional invoice",
+    weekRefs: ["Week 3: SOW and scope definition", "Week 1: GSA with SOW for operational services"],
+    question: "Supplier has delivered and invoiced for work that was never in the SOW. What do you do?",
+    graphic: "scope",
+    options: [
+      { letter:"A", text:"Pay the invoice — the work was done, the team is happy, and it would damage the relationship to refuse.", type:"wrong", points:0, outcome:"Paying an unapproved invoice sets a terrible precedent. It tells suppliers they can deliver out-of-scope work and invoice informally. It also bypasses budget approval — someone has to own the $28,000 and it was never approved.", week:"Week 3 link: Your SOW is the commercial boundary of the engagement. Work delivered outside the SOW is not automatically owed payment — but refusing to pay for completed work can create legal complications if handled badly." },
+      { letter:"B", text:"Refuse to pay and tell the supplier all additional work must be formally scoped and approved before delivery.", type:"risky", points:1, outcome:"Technically correct but may damage a good supplier relationship. A better approach is to acknowledge the situation, negotiate a fair resolution for the work already done, and put clear change control in place going forward.", week:"Week 3 link: All good SOWs include a change control process — a formal mechanism for approving out-of-scope requests before work begins. If yours does not have one, add it on renewal." },
+      { letter:"C", text:"Work with the business to get retrospective approval for the $28,000, raise an amendment to the SOW to cover the additional work, and pay the invoice once approved.", type:"best", points:3, outcome:"This is the right answer. The work was done, the business requested it informally, and refusing to pay entirely is not fair or practical. But payment must go through proper channels — retrospective budget approval and a formal SOW amendment before the invoice is processed.", week:"Week 1 link: A SOW amendment is the correct instrument here — not a new contract. It formally adds scope to the existing engagement and creates a proper audit trail for the additional spend." },
+      { letter:"D", text:"Ask the supplier to split the invoice into smaller amounts to stay under approval thresholds.", type:"wrong", points:0, outcome:"Invoice splitting to avoid approval thresholds is fraudulent. This is a serious compliance violation. Never suggest or agree to this under any circumstances.", week:"Splitting invoices to circumvent approval thresholds is a fireable offence and a regulatory risk. Always escalate unusual invoicing requests to compliance immediately." }
+    ]
+  },
+  {
+    tag: "Ethics / Governance",
+    from: "Anonymous tip → Compliance",
+    subject: "Potential conflict of interest flagged — forwarded to you",
+    text: "Compliance has forwarded a tip to you. A business stakeholder who is involved in your current vendor selection for a $2M IT contract appears to have a personal friendship with the CEO of one of the shortlisted vendors. They have not disclosed this. The evaluation is in its final stage.",
+    tag2: "Undisclosed conflict · $2M contract · Active evaluation",
+    weekRefs: ["Week 2: Pipeline call governance", "Week 3: Audit rights and compliance"],
+    question: "A stakeholder in an active $2M vendor selection has an undisclosed personal relationship with a shortlisted vendor. What do you do?",
+    graphic: "conflict2",
+    options: [
+      { letter:"A", text:"Pause the evaluation immediately, notify compliance formally, remove the stakeholder from the process, and document everything.", type:"best", points:3, outcome:"This is the only correct response. An undisclosed conflict of interest in a major procurement decision is a serious compliance and legal issue. The evaluation cannot continue with a compromised stakeholder involved. Everything must be documented.", week:"Week 2 link: The pipeline call process exists to surface exactly these governance issues before they become problems. Conflicts of interest must always be declared at the start of any procurement process." },
+      { letter:"B", text:"Speak to the stakeholder privately and ask them to recuse themselves without escalating further.", type:"risky", points:1, outcome:"Too quiet. A potential conflict of interest in a $2M decision must be formally reported to compliance — not managed informally. If it comes out later that you knew and did not report it, you share the liability.", week:"Never manage compliance issues informally. Your obligation is to report, document, and escalate — not to protect individuals from consequences." },
+      { letter:"C", text:"Continue the evaluation but apply extra scrutiny to ensure the shortlisted vendor does not win on a close decision.", type:"wrong", points:0, outcome:"Completely wrong. The conflict is already there — the evaluation is compromised regardless of the outcome. Continuing without addressing it creates legal exposure for BlackRock and personal liability for you.", week:"Week 3 link: Audit rights exist so that procurement decisions can be reviewed after the fact. An evaluation that proceeded despite a known conflict will not survive an audit." },
+      { letter:"D", text:"Disqualify the vendor with the personal connection from the process and continue the evaluation.", type:"risky", points:1, outcome:"Disqualifying the vendor resolves part of the problem but not all of it. The stakeholder's involvement still needs to be reviewed and compliance still needs to be formally notified. And disqualifying without due process may create legal exposure with the vendor.", week:"Any action taken in response to a conflict of interest needs to go through compliance. Unilateral decisions — even well-intentioned ones — can create additional risk." }
+    ]
+  },
+  {
+    tag: "Negotiation / Finance",
+    from: "Finance Director → You",
+    subject: "Budget cut — procurement impact",
+    text: "Following the budget review, your category budget has been reduced by 30% effective immediately. You are currently in final negotiations with a key software vendor where the deal is valued at $500,000. The vendor knows we want to close this month. How do you handle this?",
+    tag2: "30% budget cut · Active negotiation · Vendor expects to close",
+    weekRefs: ["Week 1: HSA for software", "Week 3: Pricing schedules and payment terms"],
+    question: "Your budget has just been cut 30% mid-negotiation. The vendor expects to close this month. What is your strategy?",
+    graphic: "budget",
+    options: [
+      { letter:"A", text:"Tell the vendor immediately about the budget cut and ask for a 30% price reduction to match.", type:"wrong", points:0, outcome:"Never reveal your budget constraints to a vendor during a negotiation. You have just handed them your floor price and told them exactly how much room you have. Expect them to anchor at a number just below your new budget.", week:"Week 3 link: Negotiation leverage collapses the moment the other side knows your constraints. Your budget is confidential commercial information — treat it that way." },
+      { letter:"B", text:"Use the budget cut as a negotiating tool — tell the vendor you can only proceed at a reduced scope or reduced price, without revealing the specific budget number.", type:"best", points:3, outcome:"Smart and correct. A budget constraint is leverage when framed correctly. 'We need to right-size this deal' is very different from 'our budget was cut by 30%.' Reduce scope, push for phased payments, or negotiate a smaller initial term with renewal options.", week:"Week 3 link: Phased pricing and annual payment schedules can significantly reduce the upfront commitment. Explore whether the HSA pricing schedule can be restructured without reopening core commercial terms." },
+      { letter:"C", text:"Pause the negotiation and go back to the business to get the budget restored before proceeding.", type:"risky", points:1, outcome:"This buys time but may lose momentum. If the vendor has competing deals, a pause signals uncertainty and weakens your position. Only pause if you are confident the budget can be restored quickly.", week:"Week 2 link: Any change to the deal value needs to be reflected in the Coupa request — make sure the dollar amount field is updated before the PO is raised." },
+      { letter:"D", text:"Close the deal at the original $500,000 and manage the budget shortfall internally later.", type:"wrong", points:0, outcome:"You cannot commit to spend you do not have budget authority for. This creates a financial control violation and puts you personally at risk. Budget authority must be confirmed before any commitment is made.", week:"Week 2 link: The dollar amount in Coupa must reflect approved budget. Committing to spend above your approved budget is a financial controls breach — regardless of how good the deal is." }
+    ]
+  }
+];
+
+var GRAPHICS = {
+  acquisition: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- desk -->
+    <rect x="100" y="160" width="600" height="12" fill="#2a2a2a" rx="2"/>
+    <!-- vendor character - smug, suit -->
+    <circle cx="580" cy="90" r="32" fill="#F5C400"/>
+    <circle cx="580" cy="78" r="18" fill="#1a1a1a"/>
+    <!-- vendor face - big smug grin -->
+    <circle cx="574" cy="74" r="3" fill="#F5C400"/>
+    <circle cx="586" cy="74" r="3" fill="#F5C400"/>
+    <path d="M572 82 Q580 90 588 82" stroke="#F5C400" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- vendor body suit -->
+    <rect x="562" y="108" width="36" height="52" fill="#2a2a2a" rx="4"/>
+    <rect x="573" y="108" width="14" height="52" fill="#1a1a1a"/>
+    <!-- vendor tie -->
+    <polygon points="580,112 576,130 580,128 584,130" fill="#e63946"/>
+    <!-- vendor sign -->
+    <rect x="490" y="120" width="120" height="40" fill="#e63946" rx="2"/>
+    <text x="550" y="136" font-family="Inter,Arial" font-size="10" font-weight="900" fill="white" text-anchor="middle">+80% OR</text>
+    <text x="550" y="151" font-family="Inter,Arial" font-size="10" font-weight="900" fill="white" text-anchor="middle">LIGHTS OUT</text>
+    <!-- procurement person - shocked -->
+    <circle cx="220" cy="90" r="32" fill="#F2A7C3"/>
+    <circle cx="220" cy="78" r="18" fill="#1a1a1a"/>
+    <!-- shocked face -->
+    <circle cx="214" cy="73" r="3" fill="#F2A7C3"/>
+    <circle cx="226" cy="73" r="3" fill="#F2A7C3"/>
+    <ellipse cx="220" cy="82" rx="5" ry="6" fill="#F2A7C3"/>
+    <!-- procurement body -->
+    <rect x="202" y="108" width="36" height="52" fill="#1a1a1a" rx="4"/>
+    <!-- speech bubble shocked -->
+    <rect x="50" y="40" width="130" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="110,76 100,90 120,76" fill="#2a2a2a"/>
+    <text x="115" y="55" font-family="Inter,Arial" font-size="10" fill="#F2A7C3" text-anchor="middle">80%?! There is</text>
+    <text x="115" y="69" font-family="Inter,Arial" font-size="10" fill="#F2A7C3" text-anchor="middle">zero budget!</text>
+    <!-- vendor speech -->
+    <rect x="620" y="30" width="140" height="48" fill="#2a2a2a" rx="4"/>
+    <polygon points="640,78 630,92 660,78" fill="#2a2a2a"/>
+    <text x="690" y="48" font-family="Inter,Arial" font-size="10" fill="#F5C400" text-anchor="middle">Welcome to</text>
+    <text x="690" y="62" font-family="Inter,Arial" font-size="10" fill="#F5C400" text-anchor="middle">BlackRock pricing</text>
+    <text x="690" y="71" font-family="Inter,Arial" font-size="9" fill="#666" text-anchor="middle">😈</text>
+  </svg>`,
+
+  conflict: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- center person being pulled -->
+    <circle cx="400" cy="95" r="28" fill="#ffffff"/>
+    <circle cx="400" cy="84" r="16" fill="#1a1a1a"/>
+    <circle cx="394" cy="80" r="2.5" fill="#fff"/>
+    <circle cx="406" cy="80" r="2.5" fill="#fff"/>
+    <path d="M394 88 Q400 84 406 88" stroke="#fff" stroke-width="1.5" fill="none"/>
+    <rect x="384" y="123" width="32" height="45" fill="#666" rx="3"/>
+    <!-- left puller - GSS person -->
+    <circle cx="180" cy="95" r="26" fill="#F5C400"/>
+    <circle cx="180" cy="84" r="15" fill="#1a1a1a"/>
+    <circle cx="174" cy="80" r="2.5" fill="#F5C400"/>
+    <circle cx="186" cy="80" r="2.5" fill="#F5C400"/>
+    <path d="M174 88 Q180 93 186 88" stroke="#F5C400" stroke-width="2" fill="none"/>
+    <rect x="165" y="121" width="30" height="45" fill="#2a2a2a" rx="3"/>
+    <!-- arms pulling left -->
+    <line x1="206" y1="105" x2="372" y2="105" stroke="#F5C400" stroke-width="4" stroke-linecap="round"/>
+    <!-- right puller - sales person -->
+    <circle cx="620" cy="95" r="26" fill="#F2A7C3"/>
+    <circle cx="620" cy="84" r="15" fill="#1a1a1a"/>
+    <circle cx="614" cy="80" r="2.5" fill="#F2A7C3"/>
+    <circle cx="626" cy="80" r="2.5" fill="#F2A7C3"/>
+    <path d="M614 89 Q620 94 626 89" stroke="#F2A7C3" stroke-width="2" fill="none"/>
+    <rect x="605" y="121" width="30" height="45" fill="#333" rx="3"/>
+    <!-- arms pulling right -->
+    <line x1="428" y1="105" x2="594" y2="105" stroke="#F2A7C3" stroke-width="4" stroke-linecap="round"/>
+    <!-- labels -->
+    <rect x="120" y="170" width="120" height="30" fill="#1a1a1a" rx="2"/>
+    <text x="180" y="190" font-family="Inter,Arial" font-size="10" font-weight="700" fill="#F5C400" text-anchor="middle">GSS NEGOTIATION</text>
+    <rect x="560" y="170" width="120" height="30" fill="#1a1a1a" rx="2"/>
+    <text x="620" y="190" font-family="Inter,Arial" font-size="10" font-weight="700" fill="#F2A7C3" text-anchor="middle">SALES OUTREACH</text>
+    <!-- speech bubbles -->
+    <rect x="50" y="30" width="110" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="90,66 80,80 110,66" fill="#2a2a2a"/>
+    <text x="105" y="47" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">Don't touch</text>
+    <text x="105" y="60" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">that vendor!</text>
+    <rect x="640" y="30" width="120" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="680,66 700,80 720,66" fill="#2a2a2a"/>
+    <text x="700" y="47" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">Huge revenue</text>
+    <text x="700" y="60" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">opportunity!</text>
+  </svg>`,
+
+  renewal: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- table -->
+    <rect x="150" y="155" width="500" height="10" fill="#2a2a2a" rx="2"/>
+    <!-- vendor - big smile sliding paper -->
+    <circle cx="580" cy="90" r="30" fill="#F5C400"/>
+    <circle cx="580" cy="79" r="17" fill="#1a1a1a"/>
+    <circle cx="574" cy="75" r="2.5" fill="#F5C400"/>
+    <circle cx="586" cy="75" r="2.5" fill="#F5C400"/>
+    <!-- big grin -->
+    <path d="M571 83 Q580 93 589 83" stroke="#F5C400" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <rect x="563" y="120" width="34" height="35" fill="#333" rx="3"/>
+    <!-- paper being slid across -->
+    <rect x="320" y="138" width="180" height="24" fill="#ffffff" rx="2"/>
+    <text x="410" y="147" font-family="Inter,Arial" font-size="8" fill="#333" text-anchor="middle" font-weight="700">RENEWAL PROPOSAL</text>
+    <text x="410" y="157" font-family="Inter,Arial" font-size="9" fill="#e63946" text-anchor="middle" font-weight="900">+5% uplift 😊</text>
+    <!-- vendor arm -->
+    <line x1="550" y1="140" x2="500" y2="148" stroke="#F5C400" stroke-width="5" stroke-linecap="round"/>
+    <!-- procurement person - skeptical expression -->
+    <circle cx="220" cy="90" r="30" fill="#F2A7C3"/>
+    <circle cx="220" cy="79" r="17" fill="#1a1a1a"/>
+    <circle cx="214" cy="74" r="2.5" fill="#F2A7C3"/>
+    <circle cx="226" cy="74" r="2.5" fill="#F2A7C3"/>
+    <!-- one eyebrow raised -->
+    <line x1="210" y1="68" x2="220" y2="65" stroke="#F2A7C3" stroke-width="2"/>
+    <line x1="222" y1="69" x2="230" y2="69" stroke="#F2A7C3" stroke-width="2"/>
+    <!-- flat mouth - skeptical -->
+    <line x1="213" y1="84" x2="227" y2="84" stroke="#F2A7C3" stroke-width="2.5" stroke-linecap="round"/>
+    <rect x="204" y="120" width="32" height="35" fill="#1a1a1a" rx="3"/>
+    <!-- thought bubble -->
+    <rect x="50" y="30" width="140" height="48" fill="#2a2a2a" rx="4"/>
+    <polygon points="100,78 90,92 120,78" fill="#2a2a2a"/>
+    <text x="120" y="50" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">Have I benchmarked</text>
+    <text x="120" y="63" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">this? Is 5% even</text>
+    <text x="120" y="76" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">market rate? 🤔</text>
+    <!-- vendor speech -->
+    <rect x="590" y="30" width="160" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="620,66 610,80 640,66" fill="#2a2a2a"/>
+    <text x="670" y="48" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">Just sign here!</text>
+    <text x="670" y="61" font-family="Inter,Arial" font-size="9" fill="#666" text-anchor="middle">90 days left 😬</text>
+  </svg>`,
+
+  maverick: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- curtain / divider -->
+    <rect x="370" y="0" width="8" height="220" fill="#2a2a2a"/>
+    <!-- left side - business person sneakily signing -->
+    <circle cx="220" cy="85" r="28" fill="#F2A7C3"/>
+    <circle cx="220" cy="74" r="16" fill="#1a1a1a"/>
+    <circle cx="214" cy="70" r="2.5" fill="#F2A7C3"/>
+    <circle cx="226" cy="70" r="2.5" fill="#F2A7C3"/>
+    <!-- sneaky smile looking sideways -->
+    <path d="M215 80 Q222 87 229 80" stroke="#F2A7C3" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- looking sideways eye movement -->
+    <circle cx="216" cy="70" r="1.5" fill="#111"/>
+    <circle cx="228" cy="70" r="1.5" fill="#111"/>
+    <rect x="204" y="113" width="32" height="45" fill="#333" rx="3"/>
+    <!-- pen in hand -->
+    <line x1="236" y1="130" x2="290" y2="148" stroke="#F2A7C3" stroke-width="3" stroke-linecap="round"/>
+    <rect x="55" y="0" width="4" height="220" fill="#2a2a2a"/>
+    <!-- contract being signed -->
+    <rect x="270" y="130" width="100" height="60" fill="#ffffff" rx="2"/>
+    <text x="320" y="148" font-family="Inter,Arial" font-size="7" fill="#333" text-anchor="middle">SUPPLIER CONTRACT</text>
+    <text x="320" y="162" font-family="Inter,Arial" font-size="7" fill="#333" text-anchor="middle">$180,000</text>
+    <line x1="280" y1="178" x2="360" y2="178" stroke="#e63946" stroke-width="1"/>
+    <text x="320" y="186" font-family="Inter,Arial" font-size="6" fill="#e63946" text-anchor="middle">sign here</text>
+    <!-- speech bubble -->
+    <rect x="60" y="30" width="130" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="110,66 100,80 130,66" fill="#2a2a2a"/>
+    <text x="125" y="48" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">GSS will be fine</text>
+    <text x="125" y="61" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">with it... right? 👀</text>
+    <!-- right side - GSS person unaware -->
+    <circle cx="570" cy="85" r="28" fill="#F5C400"/>
+    <circle cx="570" cy="74" r="16" fill="#1a1a1a"/>
+    <circle cx="564" cy="70" r="2.5" fill="#F5C400"/>
+    <circle cx="576" cy="70" r="2.5" fill="#F5C400"/>
+    <path d="M564 79 Q570 84 576 79" stroke="#F5C400" stroke-width="2" fill="none"/>
+    <rect x="554" y="113" width="32" height="45" fill="#2a2a2a" rx="3"/>
+    <!-- laptop -->
+    <rect x="500" y="140" width="120" height="70" fill="#1a1a1a" rx="3"/>
+    <rect x="505" y="145" width="110" height="58" fill="#0a0a0a" rx="2"/>
+    <text x="560" y="178" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">🤷 No requests</text>
+    <text x="560" y="191" font-family="Inter,Arial" font-size="9" fill="#666" text-anchor="middle">today, nice!</text>
+  </svg>`,
+
+  coupa: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- person staring at screen in frustration -->
+    <circle cx="200" cy="85" r="28" fill="#F2A7C3"/>
+    <circle cx="200" cy="74" r="16" fill="#1a1a1a"/>
+    <!-- frustrated face -->
+    <circle cx="194" cy="70" r="2.5" fill="#F2A7C3"/>
+    <circle cx="206" cy="70" r="2.5" fill="#F2A7C3"/>
+    <!-- squiggly angry eyebrows -->
+    <path d="M190 65 Q194 62 198 65" stroke="#F2A7C3" stroke-width="2" fill="none"/>
+    <path d="M202 65 Q206 62 210 65" stroke="#F2A7C3" stroke-width="2" fill="none"/>
+    <!-- frown -->
+    <path d="M193 82 Q200 78 207 82" stroke="#F2A7C3" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="184" y="113" width="32" height="45" fill="#1a1a1a" rx="3"/>
+    <!-- screen -->
+    <rect x="290" y="50" width="440" height="160" fill="#0d0d0d" rx="4"/>
+    <rect x="290" y="50" width="440" height="28" fill="#1a1a1a"/>
+    <text x="310" y="69" font-family="Inter,Arial" font-size="10" fill="#e63946" font-weight="700">⚠ REQUEST RETURNED — ACTION REQUIRED</text>
+    <!-- form fields -->
+    <rect x="305" y="90" width="160" height="14" fill="#2a2a2a"/>
+    <text x="310" y="101" font-family="Inter,Arial" font-size="9" fill="#666">END DATE</text>
+    <rect x="475" y="90" width="240" height="14" fill="#2a0a0a"/>
+    <text x="480" y="101" font-family="Inter,Arial" font-size="9" fill="#e63946">28 Feb 2025  ← SAME YEAR! ⚠</text>
+    <rect x="305" y="115" width="160" height="14" fill="#2a2a2a"/>
+    <text x="310" y="126" font-family="Inter,Arial" font-size="9" fill="#666">JUSTIFICATION</text>
+    <rect x="475" y="115" width="240" height="14" fill="#1f1a00"/>
+    <text x="480" y="126" font-family="Inter,Arial" font-size="9" fill="#888">Analytics tool for data team</text>
+    <rect x="305" y="140" width="160" height="14" fill="#2a2a2a"/>
+    <text x="310" y="151" font-family="Inter,Arial" font-size="9" fill="#666">AMOUNT</text>
+    <rect x="475" y="140" width="240" height="14" fill="#1a1a1a"/>
+    <text x="480" y="151" font-family="Inter,Arial" font-size="9" fill="#999">$95,000</text>
+    <!-- error message -->
+    <rect x="305" y="170" width="410" height="28" fill="#2a0a0a" rx="2"/>
+    <text x="510" y="188" font-family="Inter,Arial" font-size="9" fill="#e63946" text-anchor="middle" font-weight="700">Contract duration: less than 1 day. Please check end date year.</text>
+    <!-- steam from head -->
+    <path d="M200 57 Q205 45 200 33" stroke="#e63946" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M212 57 Q217 42 212 27" stroke="#e63946" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`,
+
+  ghost: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- desk with ringing phone -->
+    <rect x="300" y="150" width="250" height="10" fill="#2a2a2a" rx="1"/>
+    <!-- phone -->
+    <rect x="370" y="120" width="60" height="36" fill="#333" rx="4"/>
+    <rect x="378" y="126" width="44" height="22" fill="#0a0a0a" rx="2"/>
+    <!-- vibration lines -->
+    <path d="M355 128 Q348 136 355 144" stroke="#F5C400" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M346 122 Q336 136 346 150" stroke="#F5C400" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M445 128 Q452 136 445 144" stroke="#F5C400" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M454 122 Q464 136 454 150" stroke="#F5C400" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <text x="400" y="142" font-family="Inter,Arial" font-size="8" fill="#F5C400" text-anchor="middle">CALLING...</text>
+    <!-- empty chair ghost -->
+    <rect x="380" y="80" width="80" height="60" fill="#1a1a1a" rx="4"/>
+    <rect x="390" y="140" width="8" height="30" fill="#1a1a1a"/>
+    <rect x="442" y="140" width="8" height="30" fill="#1a1a1a"/>
+    <!-- ghost shape floating above chair -->
+    <ellipse cx="420" cy="42" rx="30" ry="28" fill="#222"/>
+    <rect x="390" y="42" width="60" height="24" fill="#222"/>
+    <path d="M390 66 Q400 76 410 66 Q420 76 430 66 Q440 76 450 66 L450 42 Q420 15 390 42 Z" fill="#222"/>
+    <circle cx="410" cy="38" r="5" fill="#111"/>
+    <circle cx="430" cy="38" r="5" fill="#111"/>
+    <text x="420" y="55" font-family="Inter,Arial" font-size="14" text-anchor="middle">👻</text>
+    <!-- countdown -->
+    <rect x="560" y="40" width="180" height="80" fill="#1a1a1a" rx="3"/>
+    <text x="650" y="68" font-family="Inter,Arial" font-size="10" fill="#666" text-anchor="middle" letter-spacing="2">DAYS REMAINING</text>
+    <text x="650" y="100" font-family="Inter,Arial" font-size="40" font-weight="900" fill="#e63946" text-anchor="middle">14</text>
+    <!-- procurement person panicking -->
+    <circle cx="140" cy="90" r="28" fill="#F2A7C3"/>
+    <circle cx="140" cy="79" r="16" fill="#1a1a1a"/>
+    <circle cx="134" cy="74" r="2.5" fill="#F2A7C3"/>
+    <circle cx="146" cy="74" r="2.5" fill="#F2A7C3"/>
+    <ellipse cx="140" cy="83" rx="5" ry="5" fill="#F2A7C3"/>
+    <rect x="124" y="118" width="32" height="45" fill="#1a1a1a" rx="3"/>
+    <rect x="60" y="30" width="150" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="120,66 110,80 140,66" fill="#2a2a2a"/>
+    <text x="135" y="48" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">They won't pick</text>
+    <text x="135" y="61" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">up! Contract expires!</text>
+  </svg>`,
+
+  invoice: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- finance person shocked holding invoice -->
+    <circle cx="200" cy="85" r="28" fill="#F5C400"/>
+    <circle cx="200" cy="74" r="16" fill="#1a1a1a"/>
+    <!-- shocked wide eyes -->
+    <circle cx="194" cy="69" r="4" fill="#F5C400"/>
+    <circle cx="206" cy="69" r="4" fill="#F5C400"/>
+    <circle cx="194" cy="69" r="2" fill="#111"/>
+    <circle cx="206" cy="69" r="2" fill="#111"/>
+    <!-- open mouth -->
+    <ellipse cx="200" cy="81" rx="5" ry="6" fill="#F5C400"/>
+    <rect x="184" y="113" width="32" height="45" fill="#1a1a1a" rx="3"/>
+    <!-- invoice in hands -->
+    <rect x="240" y="100" width="130" height="100" fill="#ffffff" rx="2"/>
+    <rect x="240" y="100" width="130" height="20" fill="#e63946"/>
+    <text x="305" y="114" font-family="Inter,Arial" font-size="9" fill="white" text-anchor="middle" font-weight="700">INVOICE</text>
+    <text x="305" y="138" font-family="Inter,Arial" font-size="18" fill="#1a1a1a" text-anchor="middle" font-weight="900">$45,000</text>
+    <text x="305" y="156" font-family="Inter,Arial" font-size="7" fill="#666" text-anchor="middle">BuildRight Consulting</text>
+    <line x1="255" y1="165" x2="355" y2="165" stroke="#ddd" stroke-width="0.5"/>
+    <text x="255" y="176" font-family="Inter,Arial" font-size="7" fill="#e63946">PO: NONE</text>
+    <text x="255" y="188" font-family="Inter,Arial" font-size="7" fill="#e63946">CONTRACT: NONE</text>
+    <!-- speech bubble -->
+    <rect x="390" y="60" width="180" height="60" fill="#2a2a2a" rx="4"/>
+    <polygon points="410,120 400,134 430,120" fill="#2a2a2a"/>
+    <text x="480" y="82" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">Who is BuildRight?!</text>
+    <text x="480" y="96" font-family="Inter,Arial" font-size="9" fill="#666" text-anchor="middle">No PO. No contract.</text>
+    <text x="480" y="110" font-family="Inter,Arial" font-size="9" fill="#e63946" text-anchor="middle">Cannot process! 😱</text>
+    <!-- 4 months label -->
+    <rect x="620" y="80" width="140" height="60" fill="#1a1a1a" rx="3"/>
+    <text x="690" y="105" font-family="Inter,Arial" font-size="10" fill="#666" text-anchor="middle" letter-spacing="1">ACTIVE FOR</text>
+    <text x="690" y="128" font-family="Inter,Arial" font-size="22" fill="#e63946" text-anchor="middle" font-weight="900">4 months</text>
+  </svg>`,
+
+  scope: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- building within SOW -->
+    <rect x="80" y="100" width="80" height="100" fill="#2a2a2a"/>
+    <rect x="80" y="80" width="80" height="24" fill="#333"/>
+    <rect x="80" y="60" width="80" height="24" fill="#3a3a3a"/>
+    <!-- floors label -->
+    <rect x="60" y="55" width="4" height="150" fill="#F5C400"/>
+    <text x="72" y="178" font-family="Inter,Arial" font-size="8" fill="#F5C400" transform="rotate(-90 72 178)">IN SCOPE</text>
+    <!-- builder character - smiling adding extra floor -->
+    <circle cx="280" cy="55" r="24" fill="#F2A7C3"/>
+    <circle cx="280" cy="45" r="14" fill="#1a1a1a"/>
+    <!-- happy face -->
+    <circle cx="275" cy="41" r="2" fill="#F2A7C3"/>
+    <circle cx="285" cy="41" r="2" fill="#F2A7C3"/>
+    <path d="M274 48 Q280 54 286 48" stroke="#F2A7C3" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- hard hat -->
+    <ellipse cx="280" cy="33" rx="16" ry="5" fill="#F5C400"/>
+    <rect x="267" y="28" width="26" height="8" fill="#F5C400" rx="2"/>
+    <rect x="264" y="36" width="32" height="4" fill="#d4a900"/>
+    <!-- arms adding floor -->
+    <rect x="158" y="38" width="100" height="20" fill="#e63946" rx="2" opacity="0.8"/>
+    <text x="208" y="52" font-family="Inter,Arial" font-size="8" fill="white" text-anchor="middle" font-weight="700">EXTRA FLOOR!</text>
+    <line x1="255" y1="55" x2="255" y2="40" stroke="#F2A7C3" stroke-width="4" stroke-linecap="round"/>
+    <!-- invoice emerging -->
+    <rect x="450" y="80" width="160" height="100" fill="#ffffff" rx="2"/>
+    <rect x="450" y="80" width="160" height="22" fill="#e63946"/>
+    <text x="530" y="95" font-family="Inter,Arial" font-size="9" fill="white" text-anchor="middle" font-weight="700">SURPRISE INVOICE</text>
+    <text x="530" y="125" font-family="Inter,Arial" font-size="24" fill="#1a1a1a" text-anchor="middle" font-weight="900">$28K</text>
+    <text x="530" y="148" font-family="Inter,Arial" font-size="8" fill="#666" text-anchor="middle">Not in the SOW</text>
+    <text x="530" y="162" font-family="Inter,Arial" font-size="8" fill="#e63946" text-anchor="middle">Never approved</text>
+    <!-- speech bubble from builder -->
+    <rect x="300" y="15" width="160" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="330,51 320,65 350,51" fill="#2a2a2a"/>
+    <text x="380" y="32" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">You asked for it</text>
+    <text x="380" y="45" font-family="Inter,Arial" font-size="9" fill="#F2A7C3" text-anchor="middle">informally... so 😊</text>
+  </svg>`,
+
+  conflict2: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- evaluation panel on left -->
+    <rect x="40" y="60" width="280" height="130" fill="#1a1a1a" rx="3"/>
+    <rect x="40" y="60" width="280" height="22" fill="#2a2a2a"/>
+    <text x="180" y="76" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle" letter-spacing="2">$2M VENDOR EVALUATION</text>
+    <!-- evaluator person -->
+    <circle cx="120" cy="130" r="22" fill="#F5C400"/>
+    <circle cx="120" cy="120" r="13" fill="#1a1a1a"/>
+    <circle cx="115" cy="116" r="2" fill="#F5C400"/>
+    <circle cx="125" cy="116" r="2" fill="#F5C400"/>
+    <path d="M115 124 Q120 129 125 124" stroke="#F5C400" stroke-width="2" fill="none"/>
+    <rect x="107" y="152" width="26" height="35" fill="#333" rx="2"/>
+    <!-- winking at vendor secretly -->
+    <text x="120" y="118" font-family="Inter,Arial" font-size="8" fill="#F5C400" text-anchor="middle">😉</text>
+    <!-- secret connection line -->
+    <line x1="320" y1="130" x2="480" y2="130" stroke="#e63946" stroke-width="2" stroke-dasharray="8,4"/>
+    <text x="400" y="122" font-family="Inter,Arial" font-size="8" fill="#e63946" text-anchor="middle">SECRET</text>
+    <text x="400" y="133" font-family="Inter,Arial" font-size="8" fill="#e63946" text-anchor="middle">FRIENDSHIP</text>
+    <!-- vendor CEO -->
+    <circle cx="560" cy="130" r="22" fill="#F2A7C3"/>
+    <circle cx="560" cy="120" r="13" fill="#1a1a1a"/>
+    <circle cx="555" cy="116" r="2" fill="#F2A7C3"/>
+    <circle cx="565" cy="116" r="2" fill="#F2A7C3"/>
+    <text x="560" y="120" font-family="Inter,Arial" font-size="8" fill="#F2A7C3" text-anchor="middle">😉</text>
+    <rect x="547" y="152" width="26" height="35" fill="#333" rx="2"/>
+    <text x="560" y="198" font-family="Inter,Arial" font-size="8" fill="#F2A7C3" text-anchor="middle">VENDOR CEO</text>
+    <!-- compliance officer watching -->
+    <circle cx="680" cy="100" r="20" fill="#666"/>
+    <circle cx="680" cy="90" r="12" fill="#1a1a1a"/>
+    <circle cx="675" cy="87" r="2" fill="#666"/>
+    <circle cx="685" cy="87" r="2" fill="#666"/>
+    <line x1="673" y1="95" x2="687" y2="95" stroke="#666" stroke-width="1.5"/>
+    <rect x="668" y="120" width="24" height="35" fill="#444" rx="2"/>
+    <!-- magnifying glass -->
+    <circle cx="710" cy="120" r="12" fill="none" stroke="#F5C400" stroke-width="2"/>
+    <line x1="718" y1="128" x2="726" y2="136" stroke="#F5C400" stroke-width="2" stroke-linecap="round"/>
+    <rect x="620" y="155" width="140" height="30" fill="#1a1a1a" rx="2"/>
+    <text x="690" y="174" font-family="Inter,Arial" font-size="8" fill="#e63946" text-anchor="middle">COMPLIANCE IS WATCHING</text>
+  </svg>`,
+
+  budget: `<svg width="100%" height="220" viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="220" fill="#111"/>
+    <!-- negotiation table -->
+    <rect x="100" y="165" width="600" height="10" fill="#2a2a2a" rx="2"/>
+    <!-- procurement side -->
+    <circle cx="200" cy="95" r="28" fill="#F2A7C3"/>
+    <circle cx="200" cy="84" r="16" fill="#1a1a1a"/>
+    <circle cx="194" cy="79" r="2.5" fill="#F2A7C3"/>
+    <circle cx="206" cy="79" r="2.5" fill="#F2A7C3"/>
+    <!-- stressed look -->
+    <path d="M194 88 Q200 84 206 88" stroke="#F2A7C3" stroke-width="1.5" fill="none"/>
+    <path d="M190 74 Q194 70 198 74" stroke="#F2A7C3" stroke-width="1.5" fill="none"/>
+    <rect x="184" y="123" width="32" height="42" fill="#333" rx="3"/>
+    <!-- phone notification -->
+    <rect x="90" y="135" width="80" height="30" fill="#e63946" rx="3"/>
+    <text x="130" y="148" font-family="Inter,Arial" font-size="7" fill="white" text-anchor="middle" font-weight="700">FINANCE: Budget</text>
+    <text x="130" y="159" font-family="Inter,Arial" font-size="7" fill="white" text-anchor="middle">cut 30%! 😬</text>
+    <!-- budget bar -->
+    <rect x="300" y="110" width="200" height="24" fill="#F5C400" rx="2"/>
+    <text x="400" y="126" font-family="Inter,Arial" font-size="10" fill="#111" text-anchor="middle" font-weight="900">$500K DEAL</text>
+    <!-- scissors cutting -->
+    <text x="390" y="105" font-family="Inter,Arial" font-size="20" text-anchor="middle">✂️</text>
+    <rect x="440" y="110" width="60" height="24" fill="#e63946" rx="0" opacity="0.8"/>
+    <text x="470" y="126" font-family="Inter,Arial" font-size="9" fill="white" text-anchor="middle">-30%</text>
+    <!-- vendor side - eager to close -->
+    <circle cx="600" cy="95" r="28" fill="#F5C400"/>
+    <circle cx="600" cy="84" r="16" fill="#1a1a1a"/>
+    <circle cx="594" cy="79" r="2.5" fill="#F5C400"/>
+    <circle cx="606" cy="79" r="2.5" fill="#F5C400"/>
+    <path d="M592 88 Q600 96 608 88" stroke="#F5C400" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <rect x="584" y="123" width="32" height="42" fill="#2a2a2a" rx="3"/>
+    <!-- contract on table -->
+    <rect x="490" y="148" width="100" height="22" fill="#ffffff" rx="1"/>
+    <text x="540" y="163" font-family="Inter,Arial" font-size="8" fill="#333" text-anchor="middle">Sign today! 🖊</text>
+    <!-- vendor speech -->
+    <rect x="590" y="30" width="160" height="36" fill="#2a2a2a" rx="4"/>
+    <polygon points="620,66 610,80 640,66" fill="#2a2a2a"/>
+    <text x="670" y="48" font-family="Inter,Arial" font-size="9" fill="#F5C400" text-anchor="middle">Ready to close!</text>
+    <text x="670" y="61" font-family="Inter,Arial" font-size="9" fill="#666" text-anchor="middle">$500K agreed 🤝</text>
+  </svg>`
+};
+
+var POINT_LABELS = { best: "Best move", good: "Good move", risky: "Risky move", wrong: "Wrong move" };
+var POINT_VALUES = { best: 3, good: 2, risky: 1, wrong: 0 };
+
+var currentQ = 0, totalScore = 0, streak = 0, answered = false;
+var scoreHistory = [];
+
+function startGame() {
+  document.getElementById('startScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
+  document.getElementById('scoreBar').style.display = 'flex';
+  loadScenario();
+}
+
+function loadScenario() {
+  var s = SCENARIOS[currentQ];
+  answered = false;
+
+  document.getElementById('scenarioNum').textContent = 'Deal ' + String(currentQ + 1).padStart(2,'0') + ' of ' + SCENARIOS.length;
+  document.getElementById('scenarioTag').textContent = s.tag;
+  document.getElementById('briefFrom').textContent = s.from;
+  document.getElementById('briefSubject').textContent = s.subject;
+  document.getElementById('briefText').textContent = s.text;
+  document.getElementById('briefTag').textContent = s.tag2;
+  document.getElementById('briefDot').style.background = currentQ % 2 === 0 ? 'var(--yellow)' : 'var(--pink)';
+
+  // Graphic
+  var gKey = s.graphic;
+  document.getElementById('scenarioGraphic').innerHTML = GRAPHICS[gKey] || '';
+
+  // Week refs
+  var refsHtml = s.weekRefs.map(function(r) {
+    return '<div class="week-ref"><div class="week-ref-dot"></div>' + r + '</div>';
+  }).join('');
+  document.getElementById('weekRefs').innerHTML = refsHtml;
+
+  document.getElementById('questionText').textContent = s.question;
+
+  // Options
+  document.getElementById('optionsList').innerHTML = s.options.map(function(o, i) {
+    return '<button class="opt" id="opt-' + i + '" onclick="selectOption(' + i + ')">' +
+      '<span class="opt-letter">' + o.letter + '</span>' +
+      '<span class="opt-text">' + o.text + '</span>' +
+      '</button>';
+  }).join('');
+
+  document.getElementById('outcomeBox').className = 'outcome-box';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  // Progress
+  document.getElementById('progressFill').style.width = (currentQ / SCENARIOS.length * 100) + '%';
+  document.getElementById('progressText').textContent = 'Deal ' + (currentQ + 1) + ' of ' + SCENARIOS.length;
+  document.getElementById('scoreDisplay').textContent = totalScore;
+  document.getElementById('streakDisplay').textContent = streak;
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+
+  var s = SCENARIOS[currentQ];
+  var o = s.options[idx];
+  var pts = POINT_VALUES[o.type];
+
+  // Style all buttons
+  document.querySelectorAll('.opt').forEach(function(b) { b.disabled = true; });
+  document.getElementById('opt-' + idx).classList.add(o.type, 'selected');
+
+  // Score
+  totalScore += pts;
+  if (o.type === 'best' || o.type === 'good') streak++;
+  else streak = 0;
+
+  scoreHistory.push({ title: s.subject.substring(0, 40) + '...', type: o.type, pts: pts });
+
+  document.getElementById('scoreDisplay').textContent = totalScore;
+  document.getElementById('streakDisplay').textContent = streak;
+
+  // Outcome
+  var ob = document.getElementById('outcomeBox');
+  ob.className = 'outcome-box show outcome-' + o.type;
+  document.getElementById('outcomeIcon').textContent = o.type === 'best' ? '★' : o.type === 'good' ? '✓' : o.type === 'risky' ? '⚠' : '✕';
+  document.getElementById('outcomeTitle').innerHTML = POINT_LABELS[o.type] + ' <span class="points-badge ' + o.type + '">+' + pts + ' pts</span>';
+  document.getElementById('outcomeBody').textContent = o.outcome;
+  document.getElementById('outcomeWeek').innerHTML = o.week;
+
+  var nb = document.getElementById('nextBtn');
+  nb.className = 'next-btn show';
+  nb.textContent = currentQ < SCENARIOS.length - 1 ? 'Next Deal →' : 'See Final Score →';
+}
+
+function nextScenario() {
+  currentQ++;
+  if (currentQ >= SCENARIOS.length) showFinal();
+  else loadScenario();
+}
+
+function showFinal() {
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('finalScreen').classList.add('active');
+  document.getElementById('scoreBar').style.display = 'none';
+
+  var max = SCENARIOS.length * 3;
+  document.getElementById('finalScore').textContent = totalScore;
+  document.getElementById('finalMax').textContent = 'out of ' + max + ' points';
+
+  var pct = totalScore / max;
+  var msg;
+  if (pct >= 0.9) msg = "Outstanding. You handled every deal with the instinct of a seasoned procurement professional. BlackRock GSS is in safe hands.";
+  else if (pct >= 0.7) msg = "Strong performance. You made the right call in most scenarios. Review the ones you found tricky — real deals rarely have a perfect answer but good process always helps.";
+  else if (pct >= 0.5) msg = "Good effort. Procurement judgement takes time and experience to develop. Revisit the scenarios you found difficult and think about why the best answer was the best answer.";
+  else msg = "Keep going. These are genuinely complex situations that trip up experienced practitioners. Play again and focus on the underlying principle — protect BlackRock, follow process, document everything.";
+  document.getElementById('finalMsg').textContent = msg;
+
+  document.getElementById('finalBreakdown').innerHTML = scoreHistory.map(function(h, i) {
+    return '<div class="breakdown-item"><div class="breakdown-num">Deal ' + (i+1).toString().padStart(2,'0') + '</div><div class="breakdown-title">' + h.title + '</div><div class="breakdown-score ' + h.type + '">+' + h.pts + '</div></div>';
+  }).join('');
+}
+
+function restartGame() {
+  currentQ = 0; totalScore = 0; streak = 0; answered = false; scoreHistory = [];
+  document.getElementById('scoreDisplay').textContent = 0;
+  document.getElementById('streakDisplay').textContent = 0;
+  document.getElementById('finalScreen').classList.remove('active');
+  document.getElementById('startScreen').classList.add('active');
+  document.getElementById('scoreBar').style.display = 'none';
+}
+</script>
+</body>
+</html>
