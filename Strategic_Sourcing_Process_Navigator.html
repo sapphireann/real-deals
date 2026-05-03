@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Strategic Sourcing — Process Refresh</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080d;--panel:#0d1420;--surface:#111928;--border:#182438;--hi:#1e3050;
+  --text:#cdd8f0;--muted:#4a6080;--dim:#090d14;
+  --ok:#10b981;--ok-d:rgba(16,185,129,0.12);
+  --bad:#ef4444;--bad-d:rgba(239,68,68,0.1);
+  --gold:#f5a623;--gold-d:rgba(245,166,35,0.1);
+  --accent:#6366f1;
+  --bypass:#f472b6;
+  --ai:#a78bfa;
+  --coupa:#38bdf8;
+  --sees:#4ade80;
+  --legal:#fb923c;
+}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(99,102,241,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.03) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:36px 18px 60px}
+
+/* Header */
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.title{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,36px);line-height:1.15;color:var(--text);margin-bottom:10px}
+.title span{color:var(--accent)}
+.sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:20px}
+
+/* Process legend */
+.proc-legend{display:flex;gap:8px;flex-wrap:wrap;padding:12px 14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;margin-bottom:22px}
+.proc-legend-lbl{width:100%;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.proc-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-family:'IBM Plex Mono',monospace;padding:3px 10px;border-radius:20px;border:1px solid currentColor}
+.proc-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* Cheat sheet */
+.cheatsheet{margin-bottom:22px}
+.cs-toggle{width:100%;padding:10px 14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-align:left;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
+.cs-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.cs-body{background:var(--panel);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:16px;display:none}
+.cs-body.open{display:block}
+.cs-section{margin-bottom:14px}
+.cs-section:last-child{margin-bottom:0}
+.cs-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px;font-weight:600}
+.cs-item{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px;font-size:12px;line-height:1.5}
+.cs-bullet{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+/* Progress */
+.prog-wrap{margin-bottom:24px}
+.prog-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:7px}
+.prog-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .5s ease}
+.prog-meta{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.streak{color:var(--gold);font-family:'IBM Plex Mono',monospace;font-size:10px}
+
+/* Card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .3s;animation:slideUp .32s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.card-top{padding:10px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.card-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)}
+.scenario-strip{padding:8px 22px 0;display:flex;align-items:flex-start;gap:10px}
+.scenario-box{flex:1;background:var(--dim);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:0;font-size:12px;color:var(--muted);line-height:1.55;font-family:'IBM Plex Mono',monospace}
+.scenario-box-lbl{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.card-body{padding:22px 22px 18px}
+.card-q{font-family:'Playfair Display',serif;font-size:clamp(15px,2.5vw,19px);line-height:1.6;font-style:italic}
+
+/* Choices */
+.choices{padding:0 22px 18px;display:flex;flex-direction:column;gap:9px}
+.choice{display:flex;gap:10px;padding:13px 14px;border-radius:10px;font-size:13px;text-align:left;cursor:pointer;transition:all .2s;border:1px solid var(--border);color:var(--muted);background:transparent;line-height:1.5}
+.choice:not(:disabled):hover{border-color:var(--hi);color:var(--text)}
+.choice .letter{font-family:'IBM Plex Mono',monospace;font-size:11px;flex-shrink:0}
+.choice.correct{background:var(--ok-d);border-color:var(--ok);color:var(--ok)}
+.choice.wrong{background:var(--bad-d);border-color:var(--bad);color:var(--bad)}
+
+/* Explanation */
+.expl{margin:0 22px 16px;padding:14px 16px;border-radius:10px;border-left:3px solid;animation:slideUp .28s ease}
+.expl-hdr{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px}
+.expl-txt{font-size:13.5px;line-height:1.7;color:var(--text);margin-bottom:10px}
+.rule-box{padding:10px 12px;border-radius:8px;margin-top:10px;border:1px solid}
+.rule-box-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;font-weight:600}
+.rule-list{font-size:12px;line-height:1.7;font-style:italic}
+
+/* Next */
+.btn-next{display:block;width:calc(100% - 44px);margin:0 22px 22px;padding:13px;background:transparent;border:1px solid var(--hi);border-radius:10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.1em;cursor:pointer;transition:background .2s}
+.btn-next:hover{background:var(--border)}
+
+/* Results */
+.results{text-align:center;padding:44px 16px;animation:slideUp .4s ease}
+.results-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.results-score{font-family:'Playfair Display',serif;font-size:80px;font-weight:700;line-height:1}
+.results-grade{font-size:18px;margin-top:6px;margin-bottom:4px}
+.results-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
+.process-profile{margin-bottom:20px;padding:14px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;text-align:left}
+.pp-title{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.pp-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.pp-lbl{font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--muted);width:160px;flex-shrink:0}
+.pp-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.pp-fill{height:100%;border-radius:2px;transition:width .8s ease}
+.pp-n{font-family:'IBM Plex Mono',monospace;font-size:10px;width:30px;text-align:right;flex-shrink:0}
+.review-list{text-align:left;margin-bottom:20px;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.review-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12.5px}
+.review-item:last-child{border-bottom:none}
+.review-q{color:var(--text);line-height:1.4;margin-bottom:3px}
+.review-ans{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted)}
+.btn-restart{width:100%;padding:14px;background:var(--surface);border:1px solid var(--hi);border-radius:10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.1em;cursor:pointer;transition:background .2s}
+.btn-restart:hover{background:var(--panel)}
+
+@media(max-width:480px){.choices{padding:0 14px 14px}.card-body{padding:18px 14px 14px}.expl{margin:0 14px 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div style="margin-bottom:28px">
+    <div class="eyebrow">Strategic Sourcing · Process Refresh</div>
+    <h1 class="title">Sourcing <span>Process Navigator</span></h1>
+    <p class="sub">Test your knowledge of Legal Bypass, AI Enablement (AIAC), Coupa, SEES, and amendment processes. Every scenario is drawn from real sourcing situations you will encounter.</p>
+
+    <!-- Process legend -->
+    <div class="proc-legend">
+      <div class="proc-legend-lbl">Processes covered in this game</div>
+      <span class="proc-pill" style="color:var(--bypass)"><span class="proc-dot"></span>Legal Bypass</span>
+      <span class="proc-pill" style="color:var(--ai)"><span class="proc-dot"></span>AI Enablement / AIAC</span>
+      <span class="proc-pill" style="color:var(--coupa)"><span class="proc-dot"></span>Coupa</span>
+      <span class="proc-pill" style="color:var(--sees)"><span class="proc-dot"></span>SEES</span>
+      <span class="proc-pill" style="color:var(--legal)"><span class="proc-dot"></span>Amendments</span>
+    </div>
+
+    <!-- Cheat Sheet -->
+    <div class="cheatsheet">
+      <button class="cs-toggle" onclick="toggleCS()">
+        <span>📋 Quick Reference — Key Rules & Conditions</span>
+        <span id="cs-arrow">▼</span>
+      </button>
+      <div class="cs-body" id="csBody">
+        <div class="cs-section">
+          <div class="cs-title" style="color:var(--bypass)">Legal Bypass — 3 Conditions (ALL must be met)</div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--bypass)"></div><span>An already agreed master legal framework is in place</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--bypass)"></div><span>No new legal terms and conditions — commercial terms only</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--bypass)"></div><span>Applies to Hosted Software and Professional Services only — reviewed by internal category lead</span></div>
+          <div style="margin-top:8px;padding:8px 10px;background:var(--bypass)15;border:1px solid var(--bypass)44;border-radius:6px;font-size:11px;line-height:1.6">
+            <strong style="color:var(--bypass)">Legal Bypass Email must include:</strong> vendor name, tool description, what it's for, term length, total cost, commercial terms negotiated
+          </div>
+        </div>
+        <div class="cs-section">
+          <div class="cs-title" style="color:var(--ai)">AI Enablement Process (AIAC)</div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--ai)"></div><span><strong>Step 1:</strong> Raise a PO Request in Coupa — this initiates the procurement process</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--ai)"></div><span><strong>Step 2:</strong> Submit to AIAC (AI Approval Committee) for review and approval</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--ai)"></div><span><strong>Step 3:</strong> Procurement CANNOT proceed without AIAC approval — this is a hard gate</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--ai)"></div><span><strong>Step 4:</strong> Once approved — all AI T&C must be added as an amendment to the existing contract</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--ai)"></div><span><strong>Step 5:</strong> Flag to Legal — required regardless of whether legal bypass would otherwise apply</span></div>
+        </div>
+        <div class="cs-section">
+          <div class="cs-title" style="color:var(--coupa)">Coupa</div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--coupa)"></div><span>All purchase requests must be raised in Coupa</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--coupa)"></div><span>Contract must be attached and approved before PO is issued</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--coupa)"></div><span>Coupa is the system of record — no purchase is authorised without a Coupa PO</span></div>
+        </div>
+        <div class="cs-section">
+          <div class="cs-title" style="color:var(--sees)">SEES</div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--sees)"></div><span>Supplier & Employee Expense System — used for expense reimbursement and supplier payments outside standard PO flow</span></div>
+          <div class="cs-item"><div class="cs-bullet" style="background:var(--sees)"></div><span>Not a substitute for Coupa — cannot be used to bypass the PO process</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="prog-wrap">
+    <div class="prog-track"><div class="prog-fill" id="pb" style="width:0%"></div></div>
+    <div class="prog-meta"><span id="pl">Scenario 1 of 12</span><span id="sc">0 / 0 correct</span></div>
+  </div>
+
+  <!-- Game area -->
+  <div id="area"></div>
+
+</div>
+
+<script>
+function toggleCS(){
+  const b=document.getElementById('csBody');
+  const a=document.getElementById('cs-arrow');
+  b.classList.toggle('open');
+  a.textContent=b.classList.contains('open')?'▲':'▼';
+}
+
+const PROC_COLORS={
+  'Legal Bypass':'var(--bypass)',
+  'AI Enablement':'var(--ai)',
+  'Coupa':'var(--coupa)',
+  'SEES':'var(--sees)',
+  'Amendments':'var(--legal)',
+  'Process Routing':'var(--gold)',
+};
+
+const CARDS=[
+  {
+    tag:"AI Enablement",
+    context:"A vendor you've been working with for two years — a data analytics platform — announces they are adding an AI summarisation feature to their tool. Your business team is excited and wants to start using it immediately.",
+    stem:"What is the correct sequence to follow before the business can use the new AI feature?",
+    choices:[
+      {text:"Go to AIAC first for approval, then raise a PO Request in Coupa once approved",correct:false,feedback:"Close — but the sequence is the other way around. The PO Request is raised in Coupa first to initiate the procurement process. The AIAC submission follows. Procurement then cannot proceed until AIAC approval is received."},
+      {text:"Raise a PO Request in Coupa first to initiate procurement, then submit to AIAC for approval — procurement cannot proceed without AIAC sign-off",correct:true,feedback:"Correct. The PO Request in Coupa is what kicks off the procurement process. AIAC approval must then be obtained before procurement can move forward. This is a hard gate — no AIAC approval means no procurement progress, regardless of how urgent the business need feels."},
+      {text:"Begin using the AI feature immediately and raise the PO Request retrospectively once the team has validated it works",correct:false,feedback:"The business cannot use the AI feature until AIAC has approved it. Using it first and seeking approval later bypasses the entire AIAC governance process — which exists to assess AI risk before deployment, not after."},
+    ],
+    rule:{color:"var(--ai)",label:"AIAC Sequence",text:"1. Raise PO Request in Coupa  2. Submit to AIAC for approval  3. Procurement CANNOT proceed without AIAC sign-off  4. Once approved → AI T&C amendment  5. Flag to Legal"},
+    procScore:"ai"
+  },
+  {
+    tag:"AI Enablement",
+    context:"The PO Request has been raised in Coupa and AIAC has approved the AI feature from your data analytics vendor. You now need to formalise the commercial and legal arrangements.",
+    stem:"What must happen to the existing contract — and what additional step is always required regardless of whether legal bypass would otherwise apply?",
+    choices:[
+      {text:"Raise a new standalone contract covering the AI functionality only",correct:false,feedback:"A new standalone contract is not the right approach for an AI feature being added to an existing vendor relationship. The AI terms and conditions must be added as an amendment to the existing contract."},
+      {text:"Add AI terms and conditions as an amendment to the existing contract, and flag to Legal — this step cannot be bypassed even if all legal bypass conditions are otherwise met",correct:true,feedback:"Correct. All AI terms and conditions must be documented as a formal amendment. And critically — Legal must always be flagged for AI-related changes. This requirement overrides the legal bypass process. AI cannot be legally bypassed."},
+      {text:"Apply the legal bypass process — the master framework already covers the vendor so no new legal review is needed",correct:false,feedback:"AI enablement cannot be legally bypassed. Even if the vendor relationship would otherwise qualify for legal bypass, the addition of AI terms and conditions always requires Legal involvement. AI is a specific carve-out from legal bypass."},
+    ],
+    rule:{color:"var(--ai)",label:"AI Amendment Rule",text:"AI T&C must be added as an amendment. Legal must always be flagged for AI changes — this cannot be bypassed even when a master legal framework exists."},
+    procScore:"ai"
+  },
+  {
+    tag:"Legal Bypass",
+    context:"You are renewing a Hosted Software tool. The vendor is the same, the master services agreement (MSA) is in place and unchanged, and the renewal is on exactly the same commercial terms as last year — no new legal language, no new T&C, just an updated SOW with the new term and price.",
+    stem:"Does this renewal qualify for legal bypass — and what process applies?",
+    choices:[
+      {text:"No — all renewals must go through full legal review regardless of whether terms are unchanged",correct:false,feedback:"Legal bypass exists precisely for situations like this. If all three conditions are met — master legal framework in place, no new legal terms, commercial terms only — legal bypass applies. Sending every renewal to Legal regardless is inefficient and not the process."},
+      {text:"Yes — all three legal bypass conditions are met. Submit a legal bypass email to the category lead with the required information",correct:true,feedback:"Correct. This is a textbook legal bypass scenario: existing MSA, no new legal terms, commercial terms only, and it's a Hosted Software renewal. The process is a legal bypass email to the category lead covering the vendor, tool, purpose, term, cost, and commercial terms negotiated."},
+      {text:"Yes — but you can proceed without notifying anyone since the terms haven't changed",correct:false,feedback:"Legal bypass is not a self-service decision. Even when all conditions are met, the category lead must review and approve the bypass. The email to the category lead is a mandatory step, not an optional one."},
+    ],
+    rule:{color:"var(--bypass)",label:"Legal Bypass Conditions",text:"1. Master legal framework already in place  2. No new legal T&C — commercial terms only  3. Hosted Software or Professional Services  → Submit legal bypass email to category lead"},
+    procScore:"bypass"
+  },
+  {
+    tag:"Legal Bypass",
+    context:"A Professional Services vendor is offering a new Statement of Work. You have an MSA in place. However, this SOW includes a new data processing addendum (DPA) that the vendor is requiring because of updated GDPR requirements.",
+    stem:"Does this qualify for legal bypass?",
+    choices:[
+      {text:"Yes — the MSA is already in place so legal bypass applies",correct:false,feedback:"Having an MSA is only one of three conditions. This SOW includes a new data processing addendum — that is new legal terms and conditions. The second condition (no new legal T&C) is not met. Legal bypass does not apply."},
+      {text:"No — the new DPA constitutes new legal terms and conditions, so legal bypass conditions are not fully met",correct:true,feedback:"Correct. All three conditions must be met for legal bypass. The new DPA is new legal terms — regardless of whether the MSA is in place, this must go through a full legal review. The category lead cannot bypass legal when new T&C are being introduced."},
+      {text:"Yes — a DPA is standard and doesn't require legal review",correct:false,feedback:"A DPA is a legal document with binding obligations around data handling, GDPR compliance, and liability. Characterising it as 'standard' doesn't remove the legal review requirement. New legal documents always require Legal involvement."},
+    ],
+    rule:{color:"var(--bypass)",label:"Legal Bypass Disqualifier",text:"Any new legal terms and conditions — including DPAs, NDAs, addenda, or amendments introducing new obligations — disqualify a transaction from legal bypass. ALL three conditions must be met."},
+    procScore:"bypass"
+  },
+  {
+    tag:"Legal Bypass",
+    context:"You're writing a legal bypass email to the category lead for a Hosted Software renewal. You have all the information ready.",
+    stem:"Which of the following represents a complete and correct legal bypass email?",
+    choices:[
+      {text:"'Hi [Category Lead], please approve the legal bypass for Vendor X renewal — same terms as last year. Thanks.'",correct:false,feedback:"This is missing almost everything required. A legal bypass email must include: vendor name, tool description, what it's for, term length, total cost, and the specific commercial terms that were negotiated. A one-line summary does not constitute a proper legal bypass request."},
+      {text:"'Vendor: DataVault Inc | Tool: DataVault Analytics Platform | Purpose: Internal reporting and data visualisation | Term: 12 months (Jan 2025 – Dec 2025) | Cost: £48,000 | Commercial terms negotiated: 5% discount on list price, payment net 30, auto-renewal removed'",correct:true,feedback:"Correct. This email covers all required elements: vendor, tool description, purpose, term length, cost, and the specific commercial terms negotiated. The category lead has everything they need to review and approve the bypass."},
+      {text:"'Please find attached the renewal SOW for DataVault. The MSA is in place. Please approve.'",correct:false,feedback:"Attaching the SOW is not a substitute for the required email content. The legal bypass email must contain the key information in the body — vendor, tool, purpose, term, cost, commercial terms — so the category lead can assess the bypass without having to read the full contract."},
+    ],
+    rule:{color:"var(--bypass)",label:"Legal Bypass Email — Required Content",text:"Vendor name · Tool description · What it's for · Term length · Total cost · Commercial terms negotiated (discounts, payment terms, auto-renewal changes, etc.)"},
+    procScore:"bypass"
+  },
+  {
+    tag:"Coupa",
+    context:"Your business stakeholder has agreed terms with a vendor verbally and the vendor has sent an invoice. The contract hasn't been uploaded to Coupa yet. The business wants to pay the invoice now and 'sort the Coupa process later'.",
+    stem:"What do you tell the business?",
+    choices:[
+      {text:"Agree — the relationship is established, the invoice can be paid and Coupa updated retrospectively",correct:false,feedback:"No purchase is authorised without a Coupa PO. Paying an invoice without a Coupa PO exposes the organisation to audit risk, compliance failures, and potentially unauthorised spend. Retrospective POs are not an acceptable workaround."},
+      {text:"The contract must be uploaded and approved in Coupa before a PO is issued — no payment can be made without an authorised Coupa PO",correct:true,feedback:"Correct. Coupa is the system of record for all purchases. The contract must be in Coupa, approved, and a PO issued before any invoice can be paid. There are no exceptions — 'sort it later' is not a valid approach."},
+      {text:"Use SEES to process the payment as a one-off expense while Coupa is set up",correct:false,feedback:"SEES is not a substitute for the Coupa PO process. Using SEES to bypass the Coupa requirement for a contracted purchase is a process violation. SEES has a specific and separate purpose — it cannot be used to route around the PO requirement."},
+    ],
+    rule:{color:"var(--coupa)",label:"Coupa Rule",text:"All purchases require a Coupa PO. Contract must be attached and approved in Coupa before a PO is issued. No invoice can be paid without an authorised PO. No exceptions."},
+    procScore:"coupa"
+  },
+  {
+    tag:"Coupa",
+    context:"A vendor has been engaged for a 6-month project. Midway through, the scope expands and the cost will increase by £30,000 beyond the original PO. The business wants to proceed and pay the additional amount.",
+    stem:"What is the correct Coupa process for the additional spend?",
+    choices:[
+      {text:"The vendor can invoice the additional amount against the original PO — it's the same vendor and project",correct:false,feedback:"A PO is raised for a specific value. The vendor cannot invoice more than the PO value. Additional spend requires a PO amendment or a new PO — processing an invoice against a PO that doesn't cover the amount is a Coupa compliance failure."},
+      {text:"Raise a PO amendment in Coupa to cover the additional £30,000 before the vendor invoices for the additional amount",correct:true,feedback:"Correct. Any spend beyond the original PO value requires a formal PO amendment in Coupa before the work is done or the invoice is raised. The amendment process ensures the additional spend is properly authorised."},
+      {text:"Ask the vendor to split the invoice — invoice the original amount against the PO and send a separate invoice for the additional £30,000 to be paid via SEES",correct:false,feedback:"Splitting invoices to route spend through SEES instead of Coupa is a process violation. All contracted spend must go through Coupa. SEES cannot be used to circumvent the PO process for contracted services."},
+    ],
+    rule:{color:"var(--coupa)",label:"PO Amendment Rule",text:"Any spend above the original PO value requires a Coupa PO amendment before the additional work begins or invoice is raised. Splitting invoices to avoid the amendment process is not permitted."},
+    procScore:"coupa"
+  },
+  {
+    tag:"SEES",
+    context:"A consultant who helped with a project sends you an invoice for £800 in travel expenses incurred during the engagement. These expenses were pre-approved but are not covered in the original Coupa PO (which covered professional fees only).",
+    stem:"What is the correct way to process this payment?",
+    choices:[
+      {text:"Ask the consultant to include the expenses in their next professional fees invoice so it goes through the existing Coupa PO",correct:false,feedback:"Combining expenses with professional fees in a single invoice misrepresents both the nature of the spend and the contract value. Expenses and professional fees are different cost types and should be processed separately through the appropriate system."},
+      {text:"Process the £800 travel expenses through SEES — this is the appropriate use case for SEES",correct:true,feedback:"Correct. SEES is designed for expense reimbursements and supplier payments that fall outside the standard Coupa PO flow — including pre-approved vendor expenses that are separate from contracted fees. This is a legitimate SEES use case."},
+      {text:"Raise a new Coupa PO for £800 to cover the expenses",correct:false,feedback:"Raising a new PO for a small expense reimbursement is disproportionate and not the right process. SEES exists precisely to handle this type of payment without requiring a full Coupa PO cycle."},
+    ],
+    rule:{color:"var(--sees)",label:"SEES Use Case",text:"SEES handles expense reimbursements and supplier payments outside the standard PO flow — such as pre-approved travel expenses. It is not a substitute for Coupa and cannot be used for contracted services or to bypass the PO process."},
+    procScore:"sees"
+  },
+  {
+    tag:"Amendments",
+    context:"You have an existing contract with a software vendor. The business wants to add three new user licences to the existing agreement. No new legal terms are being introduced — just a change in volume and associated cost.",
+    stem:"What is the correct approach?",
+    choices:[
+      {text:"Raise a new contract — any change to commercial terms requires a new agreement",correct:false,feedback:"A new contract is disproportionate for a volume change on an existing agreement. Amendments exist precisely for situations where the core agreement remains unchanged but commercial terms (volume, cost, term) need to be updated."},
+      {text:"Process an amendment to the existing contract reflecting the new user count and updated cost — then update the Coupa PO to reflect the new value",correct:true,feedback:"Correct. An amendment is the right vehicle for adding licences to an existing agreement when no new legal terms are being introduced. Once the amendment is signed, the Coupa PO must be updated to reflect the new value."},
+      {text:"Verbal agreement with the vendor is sufficient for a minor volume change — document it in an email",correct:false,feedback:"All commercial changes must be formally documented as amendments. A verbal agreement or email exchange is not a contract amendment — it creates ambiguity about what was agreed and exposes both parties to dispute risk."},
+    ],
+    rule:{color:"var(--legal)",label:"Amendment Rule",text:"Volume changes, cost updates, and term extensions on existing contracts should be documented as amendments — not new contracts. Amendments must be signed by authorised signatories and the Coupa PO updated to reflect the new commercial terms."},
+    procScore:"amendments"
+  },
+  {
+    tag:"Process Routing",
+    context:"A vendor is proposing a new engagement. You need to determine the correct process route. The vendor provides Professional Services, you have an MSA in place, the new SOW contains no new legal terms, and the vendor has just told you they plan to use an AI tool to deliver part of the work.",
+    stem:"What is the correct process sequence?",
+    choices:[
+      {text:"Legal bypass applies — submit the legal bypass email to the category lead and proceed",correct:false,feedback:"The AI element changes everything. Even though this would otherwise qualify for legal bypass (PS, MSA in place, no new standard legal terms), the use of AI by the vendor means a PO Request must be raised first, then AIAC approval obtained before procurement can proceed. Legal must also be flagged. AI cannot be legally bypassed."},
+      {text:"Raise a PO Request in Coupa first, submit to AIAC for approval — procurement cannot proceed without it, and Legal must be involved. Legal bypass does not apply when AI is in scope.",correct:true,feedback:"Correct. The moment AI is in scope — even as a delivery method by the vendor — the standard sequence is: PO Request in Coupa → AIAC submission → AIAC approval (hard gate) → Legal involvement → amendment if needed. Legal bypass is excluded for any AI-related engagement."},
+      {text:"Submit a legal bypass email noting the AI element and ask the category lead to decide",correct:false,feedback:"The category lead is not the decision-maker for AI suitability — AIAC is. Legal bypass cannot be applied when AI is involved. The PO Request and AIAC process must be followed regardless of whether the category lead is comfortable with the bypass."},
+    ],
+    rule:{color:"var(--ai)",label:"AI Overrides Legal Bypass",text:"If a vendor is using AI in any form — even as a delivery method — raise a PO Request first, then AIAC must approve before procurement proceeds. Legal must be involved. Legal bypass does not apply to AI engagements under any circumstances."},
+    procScore:"ai"
+  },
+  {
+    tag:"Legal Bypass",
+    context:"You are onboarding a new vendor for the first time. They provide Hosted Software. There is no existing master agreement. The business wants to use the legal bypass process because 'the tool is low risk'.",
+    stem:"Can legal bypass be used here?",
+    choices:[
+      {text:"Yes — Hosted Software qualifies for legal bypass regardless of whether a master agreement exists",correct:false,feedback:"This is incorrect. One of the three mandatory conditions for legal bypass is that a master legal framework is already in place. For a new vendor with no existing agreement, this condition cannot be met. Legal bypass is not available for first-time vendor engagements."},
+      {text:"No — legal bypass requires an existing master legal framework. A new vendor relationship must go through full legal review",correct:true,feedback:"Correct. Legal bypass requires all three conditions to be met, and 'already agreed master legal framework' is non-negotiable. For a new vendor, there is no master agreement — therefore legal bypass does not apply regardless of the perceived risk level of the tool."},
+      {text:"Yes — if the vendor is low risk and the category lead agrees, an exception can be made",correct:false,feedback:"There are no exceptions to the three conditions for legal bypass. 'Low risk' is not a legal bypass condition. Risk perception does not substitute for a formally agreed master legal framework."},
+    ],
+    rule:{color:"var(--bypass)",label:"New Vendor = No Legal Bypass",text:"Legal bypass requires a pre-existing master legal framework. New vendor relationships — regardless of tool type or perceived risk — must always go through full legal review before any agreement is signed."},
+    procScore:"bypass"
+  },
+  {
+    tag:"Process Routing",
+    context:"The business has agreed terms with an existing Professional Services vendor for a new project. MSA is in place, no new legal terms, the category lead has reviewed and approved the legal bypass email. The contract is signed.",
+    stem:"What are the remaining steps before the vendor can begin work and invoice?",
+    choices:[
+      {text:"The signed contract is sufficient — the vendor can begin and invoice when work is complete",correct:false,feedback:"A signed contract alone does not authorise payment. The contract must be uploaded to Coupa, a PO raised and approved, before the vendor begins work. An invoice cannot be paid without a Coupa PO."},
+      {text:"Upload the signed contract to Coupa, raise and approve a PO — then the vendor can begin and invoice against the PO",correct:true,feedback:"Correct. The procurement sequence ends in Coupa. Even after legal bypass approval and contract signature, a Coupa PO must be raised and approved before work starts and any invoice can be processed. This is the final step that authorises the spend."},
+      {text:"Notify Finance that the contract is signed and ask them to set up a payment mechanism",correct:false,feedback:"Finance cannot process payments without a Coupa PO. The correct route is always Coupa — not a direct Finance notification. Finance processes invoices against approved Coupa POs."},
+    ],
+    rule:{color:"var(--coupa)",label:"Sequence Reminder",text:"Legal bypass approval → contract signed → upload to Coupa → PO raised and approved → vendor begins work → vendor invoices against PO → Finance processes payment. Every step in order."},
+    procScore:"coupa"
+  },
+];
+
+const PROC_SCORES={
+  ai:{label:"AI Enablement / AIAC",color:"var(--ai)",c:0,t:0},
+  bypass:{label:"Legal Bypass",color:"var(--bypass)",c:0,t:0},
+  coupa:{label:"Coupa",color:"var(--coupa)",c:0,t:0},
+  sees:{label:"SEES",color:"var(--sees)",c:0,t:0},
+  amendments:{label:"Amendments",color:"var(--legal)",c:0,t:0},
+};
+
+let idx=0, score={c:0,t:0}, history=[], streak=0;
+
+function upd(){
+  document.getElementById('pb').style.width=(idx/CARDS.length*100)+'%';
+  document.getElementById('pl').textContent='Scenario '+(idx+1)+' of '+CARDS.length;
+  document.getElementById('sc').textContent=score.c+' / '+score.t+' correct';
+}
+
+function render(){
+  const c=CARDS[idx]; upd();
+  const tagColor=PROC_COLORS[c.tag]||'var(--accent)';
+  document.getElementById('area').innerHTML=`
+    <div class="card" id="mc">
+      <div class="card-top">
+        <span class="tag" style="color:${tagColor}">${c.tag}</span>
+        <span class="card-lbl">WHAT DO YOU DO?</span>
+      </div>
+      <div style="padding:12px 22px 0">
+        <div style="background:var(--dim);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);line-height:1.6;font-style:italic;border-left:2px solid ${tagColor}">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:${tagColor};display:block;margin-bottom:4px">SITUATION</span>
+          ${c.context}
+        </div>
+      </div>
+      <div class="card-body"><p class="card-q">"${c.stem}"</p></div>
+      <div class="choices">
+        ${c.choices.map((ch,i)=>`<button class="choice" id="ch${i}" onclick="pick(${i})"><span class="letter">${String.fromCharCode(65+i)})</span> ${ch.text}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function pick(i){
+  const c=CARDS[idx]; const ok=c.choices[i].correct;
+  score.t++; ok?(score.c++,streak++):(streak=0);
+  if(c.procScore&&PROC_SCORES[c.procScore]){PROC_SCORES[c.procScore].t++;if(ok)PROC_SCORES[c.procScore].c++;}
+  history.push({c,i,ok});
+
+  for(let j=0;j<c.choices.length;j++){
+    const b=document.getElementById('ch'+j); b.disabled=true;
+    if(c.choices[j].correct) b.classList.add('correct');
+    else if(j===i&&!ok) b.classList.add('wrong');
+  }
+
+  const ac=ok?'var(--ok)':'var(--bad)';
+  document.getElementById('mc').style.borderColor=ac;
+
+  const ruleHTML=c.rule?`<div class="rule-box" style="border-color:${c.rule.color};background:${c.rule.color}15">
+    <div class="rule-box-lbl" style="color:${c.rule.color}">${c.rule.label}</div>
+    <div class="rule-list">${c.rule.text}</div>
+  </div>`:'';
+
+  const expl=document.createElement('div');
+  expl.className='expl';
+  expl.style.cssText=`border-left-color:${ac};background:${ok?'rgba(16,185,129,0.1)':'rgba(239,68,68,0.08)'}`;
+  expl.innerHTML=`<div class="expl-hdr" style="color:${ok?'var(--ok)':'var(--bad)'}">${ok?'✓ Correct':'✗ Not quite'}</div>
+    <p class="expl-txt">${c.choices[i].feedback}</p>${ruleHTML}`;
+  document.getElementById('mc').querySelector('.choices').after(expl);
+
+  const nb=document.createElement('button');
+  nb.className='btn-next';
+  nb.textContent=idx+1>=CARDS.length?'VIEW RESULTS →':'NEXT SCENARIO →';
+  nb.onclick=next; expl.after(nb);
+
+  document.getElementById('sc').textContent=score.c+' / '+score.t+' correct';
+}
+
+function next(){idx++; idx>=CARDS.length?done():render();}
+
+function buildProfile(){
+  const rows=Object.values(PROC_SCORES).filter(p=>p.t>0).map(p=>{
+    const pct=Math.round(p.c/p.t*100);
+    return `<div class="pp-row">
+      <span class="pp-lbl">${p.label}</span>
+      <div class="pp-bar"><div class="pp-fill" style="width:${pct}%;background:${p.color}"></div></div>
+      <span class="pp-n" style="color:${p.color}">${p.c}/${p.t}</span>
+    </div>`;
+  }).join('');
+  return `<div class="process-profile"><div class="pp-title">Your Process Profile</div>${rows}</div>`;
+}
+
+function done(){
+  const p=Math.round(score.c/CARDS.length*100);
+  const [g,gc]=p>=90?['Process Expert','var(--ok)']:p>=75?['Solid Knowledge','var(--gold)']:['Review Needed','var(--bad)'];
+  const misses=history.filter(h=>!h.ok);
+  const rev=misses.length?`<div class="review-list">${misses.map(h=>`
+    <div class="review-item">
+      <span style="color:var(--bad)">✗</span>
+      <div>
+        <div class="review-q">${h.c.context.slice(0,80)}…</div>
+        <div class="review-ans">Answer: ${h.c.choices.find(c=>c.correct).text.slice(0,70)}…</div>
+      </div>
+    </div>`).join('')}</div>`:'';
+  document.getElementById('area').innerHTML=`<div class="results">
+    <div class="results-eyebrow">Assessment Complete · Strategic Sourcing</div>
+    <div class="results-score" style="color:${gc}">${p}<span style="font-size:36px">%</span></div>
+    <div class="results-grade" style="color:${gc}">${g}</div>
+    <p class="results-sub">${score.c} of ${CARDS.length} scenarios correct</p>
+    ${buildProfile()}
+    ${rev}
+    <button class="btn-restart" onclick="restart()">RETAKE →</button>
+  </div>`;
+}
+
+function restart(){
+  idx=0; score={c:0,t:0}; history=[]; streak=0;
+  Object.values(PROC_SCORES).forEach(p=>{p.c=0;p.t=0;});
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
